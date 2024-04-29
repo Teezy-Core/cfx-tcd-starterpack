@@ -7,14 +7,18 @@ author "Teezy Core Development"
 version "1.0.0"
 
 shared_scripts {
+	'@ox_lib/init.lua',
 	'config.lua'
 }
 
 client_scripts {
+	'core.lua',
 	'client/*.lua'
 }
 
 server_scripts {
+	'@mysql-async/lib/MySQL.lua',
+	'core.lua',
 	'server/*.lua'
 }
 
