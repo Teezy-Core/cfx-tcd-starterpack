@@ -1,15 +1,5 @@
 Core, Framework = GetCore()
 
-function AddItemToInventory(playerId, item, amount)
-    if Config.InventoryResource == 'ox_inventory' then
-        -- Implementation for OX Inventory
-    elseif Config.InventoryResource == 'qb-inventory' or Config.InventoryResource == 'ps-inventory' then
-        -- Implementation for QBCore Inventory
-    else
-        print('Unsupported inventory resource: ' .. Config.InventoryResource)
-    end
-end
-
 function FetchQuery(query, params)
     if Config.SQLResource == 'oxmysql' then
         return exports.oxmysql:query_async(query, params)
@@ -21,7 +11,6 @@ function FetchQuery(query, params)
         print('Unsupported SQL resource: ' .. Config.SQLResource)
     end
 end
-
 
 function ExecuteQuery(query, params, callback)
     if Config.SQLResource == 'oxmysql' then

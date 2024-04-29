@@ -1,9 +1,3 @@
-function DebugPrint(message)
-    if Config.Debug then
-        print('^1[DEBUG]^0 ' .. message)
-    end
-end
-
 function LookEntity(entity)
 	if type(entity) == "vector3" then
 		if not IsPedHeadingTowardsPosition(PlayerPedId(), entity, 30.0) then
@@ -37,7 +31,7 @@ function LoadModel(entity)
 end
 
 function MakeProp(data, freeze, synced)
-    loadModel(data.prop)
+    LoadModel(data.prop)
     local prop = CreateObject(data.prop, data.coords.x, data.coords.y, data.coords.z, synced or 0, synced or 0, 0)
     SetEntityHeading(prop, data.coords.w)
     FreezeEntityPosition(prop, freeze or 0)
