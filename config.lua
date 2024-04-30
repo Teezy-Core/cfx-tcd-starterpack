@@ -1,11 +1,15 @@
 Config = {}
 
-Config.Lang = 'en'
+--[[
+▀█▀ █▀▀ █▀▀ ▀█ █▄█   █▀▀ █▀█ █▀█ █▀▀   █▀▄ █▀▀ █░█ █▀▀ █░░ █▀█ █▀█ █▀▄▀█ █▀▀ █▄░█ ▀█▀
+░█░ ██▄ ██▄ █▄ ░█░   █▄▄ █▄█ █▀▄ ██▄   █▄▀ ██▄ ▀▄▀ ██▄ █▄▄ █▄█ █▀▀ █░▀░█ ██▄ █░▀█ ░█░
+]]
 
+Config.Lang = 'en'
 Config.Debug = false                      -- if you want to see debug messages in console
 
-Config.TargetResource = 'qb-target'       -- supported: ox_target, qb-target
-Config.InventoryResource = 'qb-inventory' -- supported: ox_inventory, qb-inventory, ps-inventory
+Config.TargetResource = 'ox_target'       -- supported: ox_target, qb-target
+Config.InventoryResource = 'ox_inventory' -- supported: ox_inventory, qb-inventory, ps-inventory
 Config.SQLResource = 'oxmysql'            -- supported: oxmysql, mysql-async, ghmattimysql
 
 Config.UseCommand = true                  -- if you want to use command to give starter pack to player
@@ -19,26 +23,25 @@ Config.Target = {
     distance = 2.0,
 }
 
-Config.StarterPackItems = {
-    -- {item = 'bread', amount = 5},
-    -- {item = 'water', amount = 5},
-    -- {item = 'phone', amount = 1},
-    -- {item = 'lockpick', amount = 5},
-    -- {item = 'money', amount = 5000},
-    { item = 'id_card',          amount = 5 },
-    { item = 'lockpick',         amount = 5 },
-    { item = 'phone',            amount = 1 },
-    { item = 'advancedlockpick', amount = 5 },
+Config.StarterPackItems = { -- items that will be given to player
+    { item = 'bread',    amount = 5 },
+    { item = 'water',    amount = 5 },
+    { item = 'phone',    amount = 1 },
+    { item = 'lockpick', amount = 5 },
+    { item = 'money',    amount = 5000 },
 }
 
 Config.EnableStarterVehicle = true -- if you want to give starter vehicle to player
 Config.StarterVehicle = {
-    model = 'adder',
-    teleport_player = true, -- if you want to teleport player to vehicle
+    model = 'adder',               -- https://wiki.rage.mp/index.php?title=Vehicles
+    teleport_player = true,        -- player will be teleported to the vehicle
     vehicle_spawn = vec4(-1040.123047, -2727.138428, 20.046143, 238.110229),
-    fuel = 100.0,
+    fuel = 100.0,                  -- fuel level of the vehicle
 }
 
+---@param vehicle any
+---@param fuel number
+---@decription Set fuel level of the vehicle by default it uses LegacyFuel
 Config.SetFuel = function(vehicle, fuel)
     exports.LegacyFuel:SetFuel(vehicle, fuel)
 end
@@ -65,7 +68,6 @@ Config.Locale = {
         ['received'] = 'You have already received your starter pack',
         ['success'] = 'You have received your starter pack, Enjoy!',
         ['canceled'] = 'You have canceled the starter pack',
-        ['not_near_receiving_point'] =
-        'You are not near the receiving point, you must be near the receiving point to receive the starter pack',
+        ['not_near_receiving_point'] = 'You are not near the receiving point',
     },
 }
