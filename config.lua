@@ -2,7 +2,7 @@ Config = {}
 
 Config.Lang = 'en'
 
-Config.Debug = true -- if you want to see debug messages in console
+Config.Debug = false -- if you want to see debug messages in console
 
 Config.TargetResource = 'qb-target' -- supported: ox_target, qb-target
 Config.InventoryResource = 'qb-inventory' -- supported: ox_inventory, qb-inventory, ps-inventory

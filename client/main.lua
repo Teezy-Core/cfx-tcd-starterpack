@@ -52,7 +52,7 @@ local function InitializeScenario()
                 false, true, 1, true)
             ClearPedTasksImmediately(ped)
             LookEntity(ped)
-            TaskPlayAnim(playerPed, "amb@prop_human_atm@male@enter", "enter", 1.0, 1.0, 0.3, 16, 0.2, 0, 0, 0) -- Start animations
+            TaskPlayAnim(playerPed, "amb@prop_human_atm@male@enter", "enter", 1.0, 1.0, 0.3, 16, 0.2, 0, 0, 0)
             TaskPlayAnim(ped, "mp_common", "givetake2_b", 1.0, 1.0, 0.3, 16, 0.2, 0, 0, 0)
             Wait(1000)
             AttachEntityToEntity(boxprop, playerPed, GetPedBoneIndex(playerPed, 57005), 0.1, -0.0, 0.0, -90.0, 0.0, 0.0,

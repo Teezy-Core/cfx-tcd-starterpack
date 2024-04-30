@@ -2,7 +2,7 @@ fx_version 'cerulean'
 game 'gta5'
 
 name "cfx-tcd-starterpack"
-description "A Advanced Starter Pack for New Players"
+description "A Advanced Starter Pack System for QBCore and ESX Framework"
 author "Teezy Core Development"
 version "1.0.0"
 
@@ -20,6 +20,10 @@ server_scripts {
 	'@mysql-async/lib/MySQL.lua',
 	'core.lua',
 	'server/*.lua'
+}
+
+dependencies {
+	'ox_lib',
 }
 
 lua54 'yes'
