@@ -22,6 +22,13 @@ server_scripts {
 	'server/*.lua'
 }
 
+escrow_ignore {
+	'config.lua',
+	'core.lua',
+	'client/*.lua',
+	'server/*.lua'
+}
+
 dependencies {
 	'ox_lib',
 }
