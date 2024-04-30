@@ -83,9 +83,9 @@ function InitializeTarget()
     if Config.UseTarget then
         if Config.TargetResource == 'ox_target' and GetResourceState(Config.TargetResource) == 'started' then
             if Config.Debug then print("[^2INFO^7] ^5Using ^7^1OX_TARGET^7 ^5resource^7") end
-    
+
             local options = {}
-    
+
             options[#options + 1] = {
                 name = 'starterpack',
                 icon = 'fa-solid fa-gift',
@@ -100,7 +100,7 @@ function InitializeTarget()
                                     useWhileDead = false,
                                     canCancel = true,
                                 }) then
-                                    InitializeScenario()
+                                InitializeScenario()
                             else
                                 Config.Notification(Config.Locale[Config.Lang]['canceled'], 'inform', false, source)
                             end
@@ -110,20 +110,21 @@ function InitializeTarget()
                     end)
                 end,
                 canInteract = function()
-                    if IsPedInAnyVehicle(PlayerPedId(), true) or IsEntityDead(PlayerPedId()) or lib.progressActive()  then
+                    if IsPedInAnyVehicle(PlayerPedId(), true) or IsEntityDead(PlayerPedId()) or lib.progressActive() then
                         return false
                     end
                     return true
                 end
             }
-    
+
             exports.ox_target:addModel(Config.Target.ped, options)
         elseif Config.TargetResource == 'qb-target' and GetResourceState(Config.TargetResource) == 'started' then
             if Config.Debug then print("[^2INFO^7] ^5Using ^7^1QB-TARGET^7 ^5resource^7") end
-            Targets["qb_target_ped"] = exports['qb-target']:AddCircleZone("qb_target_ped", Config.Target.coords.xyz, 0.5, {
-                name = "qb_target_ped",
-                debugPoly = Config.Debug,
-                useZ = true,
+            Targets["qb_target_ped"] = exports['qb-target']:AddCircleZone("qb_target_ped", Config.Target.coords.xyz, 0.5,
+                {
+                    name = "qb_target_ped",
+                    debugPoly = Config.Debug,
+                    useZ = true,
                 }, {
                 options = {
                     {
@@ -138,9 +139,10 @@ function InitializeTarget()
                                             useWhileDead = false,
                                             canCancel = true,
                                         }) then
-                                            InitializeScenario()
+                                        InitializeScenario()
                                     else
-                                        Config.Notification(Config.Locale[Config.Lang]['canceled'], 'inform', false, source)
+                                        Config.Notification(Config.Locale[Config.Lang]['canceled'], 'inform', false,
+                                            source)
                                     end
                                 else
                                     Config.Notification(Config.Locale[Config.Lang]['received'], 'error', false, source)
@@ -148,7 +150,7 @@ function InitializeTarget()
                             end)
                         end,
                         canInteract = function()
-                            if IsPedInAnyVehicle(PlayerPedId(), true) or IsEntityDead(PlayerPedId()) or lib.progressActive()  then
+                            if IsPedInAnyVehicle(PlayerPedId(), true) or IsEntityDead(PlayerPedId()) or lib.progressActive() then
                                 return false
                             end
                             return true
@@ -180,7 +182,7 @@ if Config.UseCommand then
                         position = 'bottom',
                         useWhileDead = false,
                         canCancel = true,
-                    }) 
+                    })
                 then
                     TriggerServerEvent("cfx-tcd-starterpack:ClaimStarterpack")
                     Wait(1000)
