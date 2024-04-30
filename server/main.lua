@@ -35,6 +35,66 @@ lib.callback.register('cfx-tcd-starterpack:CheckPlayer', function(source)
     end
 end)
 
+local function SendDiscordLog(source, desc)
+    local time = os.date("%c")
+    local webhook = DiscordConfig.webhook
+    local title = DiscordConfig.title
+    local thumbnail_url = DiscordConfig.thumbnail
+    local color = DiscordConfig.color
+
+    if not webhook then
+        print("^1[ERROR] ^7Discord Webhook is not set")
+        return
+    end
+
+    if Config.Debug then print("^1[DEBUG] ^7Sending Discord Log") end
+
+    local embed = {
+        {
+            ["author"] = {
+                ["name"] = "Teezy Core Development",
+                ["icon_url"] = "https://i.imgur.com/6s82WUZ.png",
+            },
+            ["color"] = tonumber(color),
+            ["title"] = title,
+            ["description"] = desc,
+            ["thumbnail"] = {
+                ["url"] = thumbnail_url,
+            },
+            ["fields"] = {
+                {
+                    ["name"] = "Player: ",
+                    ["value"] = "```" .. GetPlayerName(source) .. "```",
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "Server ID: ",
+                    ["value"] = "```" .. source .. "```",
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "License ID:",
+                    ["value"] = "```" .. GetPlayerIdentifiers(source)[1] .. "```",
+                    ["inline"] = false
+                },
+                {
+                    ["name"] = "Time",
+                    ["value"] = time,
+                    ["inline"] = true
+                },
+            },
+            ["timestamp"] = os.date('!%Y-%m-%dT%H:%M:%SZ'),
+            ["footer"] = {
+                ["text"] = "Powered by TCD",
+                ["icon_url"] = "https://i.imgur.com/6s82WUZ.png",
+            },
+        }
+    }
+    PerformHttpRequest(webhook,
+        function(err, text, headers) end, 'POST', json.encode({ embeds = embed }),
+        { ['Content-Type'] = 'application/json' })
+end
+
 function UpdateRecevied(Player)
     local identifier = Framework == "esx" and Player.identifier or Player.PlayerData.citizenid
     local currentDate = os.date("%m/%d/%Y")
@@ -42,6 +102,8 @@ function UpdateRecevied(Player)
     local params = {1, currentDate, identifier}
 
     ExecuteQuery(query, params)
+
+    if Config.Debug then print("^2[DEBUG] ^7Updated received status for player: " .. identifier) end
 end
 
 RegisterServerEvent("cfx-tcd-starterpack:ClaimVehicle")
@@ -74,7 +136,8 @@ end)
 
 RegisterServerEvent("cfx-tcd-starterpack:ClaimStarterpack")
 AddEventHandler("cfx-tcd-starterpack:ClaimStarterpack", function()
-    local Player = Framework == "esx" and Core.GetPlayerFromId(source) or Core.Functions.GetPlayer(source)
+    local src = source
+    local Player = Framework == "esx" and Core.GetPlayerFromId(src) or Core.Functions.GetPlayer(src)
 
     for i = 1, #Config.StarterPackItems do
         local item = Config.StarterPackItems[i].item
@@ -86,12 +149,13 @@ AddEventHandler("cfx-tcd-starterpack:ClaimStarterpack", function()
         elseif Config.InventoryResource == 'qb-inventory' or Config.InventoryResource == 'ps-inventory' then
             local itemInfo = Core.Shared.Items[item]
             Player.Functions.AddItem(item, amount)
-            TriggerClientEvent('inventory:client:ItemBox', source, itemInfo, 'add')
+            TriggerClientEvent('inventory:client:ItemBox', src, itemInfo, 'add')
         else
             if Config.Debug then print("^1[DEBUG] ^7Inventory resource not found") end
         end
     end
 
     UpdateRecevied(Player)
+    SendDiscordLog(src, "Player has received their starter pack")
     Config.Notification(Config.Locale[Config.Lang]['success'], 'success', true, source)
 end)
