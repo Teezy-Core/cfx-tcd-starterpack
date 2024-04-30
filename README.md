@@ -26,6 +26,8 @@ New players on your FiveM server can receive freebies with this resource. You ca
 - **Starter Vehicle Option:** Provide a starter vehicle to players with customizable options such as model, fuel level, and teleportation.
 - **LegacyFuel Compatibility:** Easily integrate with LegacyFuel to manage vehicle fuel levels.
 - **Notification System:** Customizable notification system based on server framework (ESX or QBCore).
+- Includes built-in Discord logging.
+- This resource is running at idle with 0.00 ms.
 
 ## Usage:
 1. Configure the settings according to your server's setup.
