@@ -23,28 +23,20 @@ local function StarterVehicle()
             TriggerServerEvent('cfx-tcd-starterpack:ClaimVehicle', vehicleData)
         end)
     else
+        Core.Functions.SpawnVehicle(vehicle, function(veh)
+            SetEntityHeading(veh, vehicleSpawn.w)
+            if Config.StarterVehicle.teleport_player then
+                TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
+            end
+            Config.SetFuel(veh, Config.StarterVehicle.fuel)
 
+            local vehicleData = {
+                props = Core.Functions.GetVehicleProperties(veh),
+            }
+            TriggerEvent("vehiclekeys:client:SetOwner", Core.Functions.GetPlate(veh))
+            TriggerServerEvent('cfx-tcd-starterpack:ClaimVehicle', vehicleData)
+        end, vehicleSpawn, true)
     end
-
-    -- local plate = "FREE"..math.random(1000, 9999)
-    -- local vehicleData = {}
-
-    -- RequestModel(vehicle)
-    -- while not HasModelLoaded(vehicle) do
-    --     Wait(1)
-    -- end
-
-    -- local spawned_car = CreateVehicle(vehicle, vehicleSpawn.x, vehicleSpawn.y, vehicleSpawn.z, vehicleSpawn.w, true, false)
-
-    -- SetVehicleOnGroundProperly(spawned_car)
-    -- SetVehicleNumberPlateText(spawned_car, plate)
-    -- SetVehicleEngineOn(spawned_car, true, true, false)
-    -- SetVehicleHasBeenOwnedByPlayer(spawned_car, true)
-    -- SetVehicleNeedsToBeHotwired(spawned_car, false)
-    -- SetModelAsNoLongerNeeded(vehicle)
-    -- SetVehRadioStation(spawned_car, "OFF")
-    -- SetPedIntoVehicle(PlayerPedId(), spawned_car, -1)
-    -- SetVehicleFuelLevel(vehicle, Config.StarterVehicle.fuel)
 end
 
 local function InitializeScenario()
@@ -128,6 +120,43 @@ function InitializeTarget()
             exports.ox_target:addModel(Config.Target.ped, options)
         elseif Config.TargetResource == 'qb-target' and GetResourceState(Config.TargetResource) == 'started' then
             if Config.Debug then print("[^2INFO^7] ^5Using ^7^1QB-TARGET^7 ^5resource^7") end
+            Targets["qb_target_ped"] = exports['qb-target']:AddCircleZone("qb_target_ped", Config.Target.coords.xyz, 0.5, {
+                name = "qb_target_ped",
+                debugPoly = Config.Debug,
+                useZ = true,
+                }, {
+                options = {
+                    {
+                        icon = "fas fa-gift",
+                        label = Config.Target.label,
+                        action = function()
+                            lib.callback('cfx-tcd-starterpack:CheckPlayer', false, function(data)
+                                if data then
+                                    if lib.progressCircle({
+                                            duration = 3000,
+                                            position = 'bottom',
+                                            useWhileDead = false,
+                                            canCancel = true,
+                                        }) then
+                                            InitializeScenario()
+                                    else
+                                        Config.Notification(Config.Locale[Config.Lang]['canceled'], 'inform', false, source)
+                                    end
+                                else
+                                    Config.Notification(Config.Locale[Config.Lang]['received'], 'error', false, source)
+                                end
+                            end)
+                        end,
+                        canInteract = function()
+                            if IsPedInAnyVehicle(PlayerPedId(), true) or IsEntityDead(PlayerPedId()) or lib.progressActive()  then
+                                return false
+                            end
+                            return true
+                        end
+                    },
+                },
+                distance = 2.0
+            })
         else
             print("^1[ERROR] ^7Target resource not found or not started")
         end
@@ -179,6 +208,7 @@ function zone:onEnter()
 end
 
 function zone:onExit()
+    for k in pairs(Targets) do exports['qb-target']:RemoveZone(k) end
     for k in pairs(Peds) do DeleteEntity(Peds[k]) end
 end
 

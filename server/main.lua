@@ -36,9 +36,10 @@ lib.callback.register('cfx-tcd-starterpack:CheckPlayer', function(source)
 end)
 
 function UpdateRecevied(Player)
+    local identifier = Framework == "esx" and Player.identifier or Player.PlayerData.citizenid
     local currentDate = os.date("%m/%d/%Y")
     local query = "UPDATE tcd_starterpack SET received = ?, date_received = ? WHERE identifier = ?"
-    local params = {1, currentDate, Player.identifier}
+    local params = {1, currentDate, identifier}
 
     ExecuteQuery(query, params)
 end
@@ -57,7 +58,17 @@ AddEventHandler("cfx-tcd-starterpack:ClaimVehicle", function(vehicleData)
         }
         InsertQuery(query, params)
     else
-
+        local query = "INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, garage) VALUES (@license, @citizenid, @vehicle, @hash, @mods, @plate, @garage)"
+        local params = {
+            ['@license'] = Player.PlayerData.license,
+            ['@citizenid'] = identifier,
+            ['@vehicle'] = Config.StarterVehicle.model,
+            ['@hash'] = GetHashKey(vehicleData.props.model),
+            ['@mods'] = '{}',
+            ['@plate'] = vehicleData.props.plate,
+            ['@garage'] = 'pillboxgarage'
+        }
+        InsertQuery(query, params)
     end
 end)
 
@@ -73,7 +84,9 @@ AddEventHandler("cfx-tcd-starterpack:ClaimStarterpack", function()
             if Config.Debug then print("^1[DEBUG] ^7Adding item: ^5" .. item .. "^7 to player: ^5" .. Player.identifier .. "^7 with amount: ^5" .. amount .. "^7") end
             exports.ox_inventory:AddItem(source, item, amount)
         elseif Config.InventoryResource == 'qb-inventory' or Config.InventoryResource == 'ps-inventory' then
+            local itemInfo = Core.Shared.Items[item]
             Player.Functions.AddItem(item, amount)
+            TriggerClientEvent('inventory:client:ItemBox', source, itemInfo, 'add')
         else
             if Config.Debug then print("^1[DEBUG] ^7Inventory resource not found") end
         end

@@ -4,8 +4,8 @@ Config.Lang = 'en'
 
 Config.Debug = true -- if you want to see debug messages in console
 
-Config.TargetResource = 'ox_target' -- supported: ox_target, qb-target
-Config.InventoryResource = 'ox_inventory' -- supported: ox_inventory, qb-inventory, ps-inventory
+Config.TargetResource = 'qb-target' -- supported: ox_target, qb-target
+Config.InventoryResource = 'qb-inventory' -- supported: ox_inventory, qb-inventory, ps-inventory
 Config.SQLResource = 'oxmysql' -- supported: oxmysql, mysql-async, ghmattimysql
 
 Config.UseCommand = true -- if you want to use command to give starter pack to player
@@ -20,14 +20,18 @@ Config.Target = {
 }
 
 Config.StarterPackItems = {
-    {item = 'bread', amount = 5},
-    {item = 'water', amount = 5},
-    {item = 'phone', amount = 1},
+    -- {item = 'bread', amount = 5},
+    -- {item = 'water', amount = 5},
+    -- {item = 'phone', amount = 1},
+    -- {item = 'lockpick', amount = 5},
+    -- {item = 'money', amount = 5000},
+    {item = 'id_card', amount = 5},
     {item = 'lockpick', amount = 5},
-    {item = 'cash', amount = 5000},
+    {item = 'phone', amount = 1},
+    {item = 'advancedlockpick', amount = 5},
 }
 
-Config.EnableStarterVehicle = false -- if you want to give starter vehicle to player
+Config.EnableStarterVehicle = true -- if you want to give starter vehicle to player
 Config.StarterVehicle = {
     model = 'adder',
     teleport_player = true, -- if you want to teleport player to vehicle
@@ -45,13 +49,13 @@ Config.Notification = function (message, type, is_server, src)
         if Framework == "esx" then
             TriggerClientEvent("esx:showNotification", src, message)
         else
-            TriggerClientEvent('QBCore:Notify', src, message, type, 20000)
+            TriggerClientEvent('QBCore:Notify', src, message, type, 5000)
         end
     else
         if Framework == "esx" then
             TriggerEvent("esx:showNotification", message)
         else
-            TriggerEvent('QBCore:Notify', message, type, 20000)
+            TriggerEvent('QBCore:Notify', message, type, 5000)
         end
     end
 end
@@ -62,7 +66,5 @@ Config.Locale = {
         ['success'] = 'You have received your starter pack, Enjoy!',
         ['canceled'] = 'You have canceled the starter pack',
         ['not_near_receiving_point'] = 'You are not near the receiving point, you must be near the receiving point to receive the starter pack',
-
-        ['interaction'] = 'Press ~g~[E]~s~ to receive your starter pack',
     },
 }
