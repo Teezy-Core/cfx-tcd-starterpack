@@ -4,7 +4,7 @@ game 'gta5'
 name "cfx-tcd-starterpack"
 description "A Advanced Starter Pack System for QBCore and ESX Framework"
 author "Teezy Core Development"
-version "1.0.0"
+version "1.1.0"
 
 shared_scripts {
 	'@ox_lib/init.lua',
