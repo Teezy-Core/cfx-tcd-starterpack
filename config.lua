@@ -9,7 +9,7 @@ Config.Lang = 'en'
 Config.Debug = false                      -- if you want to see debug messages in console
 
 Config.TargetResource = 'ox_target'       -- supported: ox_target, qb-target
-Config.InventoryResource = 'ox_inventory' -- supported: ox_inventory, qb-inventory, ps-inventory
+Config.InventoryResource = 'ox_inventory' -- supported: ox_inventory, qb-inventory, ps-inventory, qs-inventory
 Config.SQLResource = 'oxmysql'            -- supported: oxmysql, mysql-async, ghmattimysql
 
 Config.UseCommand = true                  -- if you want to use command to give starter pack to player
@@ -35,7 +35,7 @@ Config.EnableStarterVehicle = true -- if you want to give starter vehicle to pla
 Config.StarterVehicle = {
     model = 'adder',               -- https://wiki.rage.mp/index.php?title=Vehicles
     teleport_player = true,        -- player will be teleported to the vehicle
-    vehicle_spawn = vec4(-1040.123047, -2727.138428, 20.046143, 238.110229),
+    vehicle_spawn = vec4(-1040.123047, -2727.138428, 20.046143, 238.110229), -- vehicle spawn location and heading
     fuel = 100.0,                  -- fuel level of the vehicle
 }
 

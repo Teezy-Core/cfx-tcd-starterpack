@@ -152,6 +152,8 @@ AddEventHandler("cfx-tcd-starterpack:ClaimStarterpack", function()
             local itemInfo = Core.Shared.Items[item]
             Player.Functions.AddItem(item, amount)
             TriggerClientEvent('inventory:client:ItemBox', src, itemInfo, 'add')
+        elseif Config.InventoryResource == 'qs-inventory' then
+            exports['qs-inventory']:AddItem(source, item, amount)
         else
             if Config.Debug then print("^1[DEBUG] ^7Inventory resource not found") end
         end
