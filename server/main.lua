@@ -144,18 +144,26 @@ AddEventHandler("cfx-tcd-starterpack:ClaimStarterpack", function()
         local item = Config.StarterPackItems[i].item
         local amount = Config.StarterPackItems[i].amount
 
-        if Config.InventoryResource == 'ox_inventory' then
-            if Config.Debug then print("^1[DEBUG] ^7Adding item: ^5" ..
-                item .. "^7 to player: ^5" .. Player.identifier .. "^7 with amount: ^5" .. amount .. "^7") end
-            exports.ox_inventory:AddItem(source, item, amount)
-        elseif Config.InventoryResource == 'qb-inventory' or Config.InventoryResource == 'ps-inventory' then
+        if Config.InventoryResource == 'ox_inventory' and GetResourceState(Config.InventoryResource) == 'started' then
+            local success, response = exports.ox_inventory:AddItem(src, item, amount)
+            if not success then
+                if response == 'invalid_item' then
+                    print("^1[ERROR] ^7Invalid item: " .. item)
+                end
+            end
+        elseif Config.InventoryResource == 'qb-inventory' or Config.InventoryResource == 'ps-inventory' and GetResourceState(Config.InventoryResource) == 'started' then
             local itemInfo = Core.Shared.Items[item]
-            Player.Functions.AddItem(item, amount)
-            TriggerClientEvent('inventory:client:ItemBox', src, itemInfo, 'add')
-        elseif Config.InventoryResource == 'qs-inventory' then
-            exports['qs-inventory']:AddItem(source, item, amount)
+            if itemInfo then
+                Player.Functions.AddItem(item, amount)
+                TriggerClientEvent('inventory:client:ItemBox', src, itemInfo, 'add', amount)
+            else
+                print("^1[ERROR] ^7Invalid item: " .. item)
+            end
+        elseif Config.InventoryResource == 'qs-inventory' and GetResourceState(Config.InventoryResource) == 'started' then
+            exports['qs-inventory']:AddItem(src, item, amount)
+            -- I don't have qs-inventory so I can't test this, and add error handling for this
         else
-            if Config.Debug then print("^1[DEBUG] ^7Inventory resource not found") end
+            error(Config.InventoryResource .. " is not found or not started", 2)
         end
     end
 

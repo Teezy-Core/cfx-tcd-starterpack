@@ -31,7 +31,7 @@ Config.StarterPackItems = { -- items that will be given to player
     { item = 'money',    amount = 5000 },
 }
 
-Config.EnableStarterVehicle = true -- if you want to give starter vehicle to player
+Config.EnableStarterVehicle = false -- if you want to give starter vehicle to player
 Config.StarterVehicle = {
     model = 'adder',               -- https://wiki.rage.mp/index.php?title=Vehicles
     teleport_player = true,        -- player will be teleported to the vehicle
