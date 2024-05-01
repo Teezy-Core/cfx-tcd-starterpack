@@ -46,6 +46,18 @@ Config.SetFuel = function(vehicle, fuel)
     exports.LegacyFuel:SetFuel(vehicle, fuel)
 end
 
+---@param vehicle any
+---@return string
+---@decription If you have a custom vehicle key system you can give the key to the player
+Config.GiveKey = function (vehicle)
+    local Core, Framework = GetCore()
+    if Framework == "esx" then
+        -- ESX Vehicle Key System
+    else
+        TriggerEvent("vehiclekeys:client:SetOwner", Core.Functions.GetPlate(vehicle))
+    end
+end
+
 Config.Notification = function(message, type, is_server, src)
     local Core, Framework = GetCore()
     if is_server then

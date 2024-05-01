@@ -20,6 +20,7 @@ local function StarterVehicle()
                 props = Core.Game.GetVehicleProperties(vehicle),
             }
 
+            Config.GiveKey(vehicle)
             TriggerServerEvent('cfx-tcd-starterpack:ClaimVehicle', vehicleData)
         end)
     else
@@ -33,7 +34,7 @@ local function StarterVehicle()
             local vehicleData = {
                 props = Core.Functions.GetVehicleProperties(veh),
             }
-            TriggerEvent("vehiclekeys:client:SetOwner", Core.Functions.GetPlate(veh))
+            Config.GiveKey(veh)
             TriggerServerEvent('cfx-tcd-starterpack:ClaimVehicle', vehicleData)
         end, vehicleSpawn, true)
     end
