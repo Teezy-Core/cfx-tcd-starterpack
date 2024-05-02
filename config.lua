@@ -6,7 +6,7 @@ Config = {}
 ]]
 
 Config.Lang = 'en'
-Config.Debug = true                      -- if you want to see debug messages in console
+Config.Debug = true                       -- if you want to see debug messages in console
 
 Config.TargetResource = 'ox_target'       -- supported: ox_target, qb-target
 Config.InventoryResource = 'ox_inventory' -- supported: ox_inventory, qb-inventory, ps-inventory, qs-inventory
@@ -19,6 +19,7 @@ Config.UseTarget = true                   -- if you want to use target script to
 Config.Target = {
     ped = 'a_m_y_business_03',            -- https://docs.fivem.net/docs/game-references/ped-models/
     label = 'Get your starter pack',
+    receiving_radius = 20.0,              -- radius to receive the starter pack
     coords = vec4(-1040.479126, -2731.582520, 20.164062, 238.110229),
     distance = 2.0,
 }
@@ -31,18 +32,18 @@ Config.StarterPackItems = { -- items that will be given to player
     { item = 'money',    amount = 5000 },
 }
 
-Config.EnableStarterVehicle = true                                          -- if you want to give starter vehicle to player
+Config.EnableStarterVehicle = true -- if you want to give starter vehicle to player
 Config.StarterVehicle = {
-    model = 'adder',                                                         -- https://docs.fivem.net/docs/game-references/vehicle-models/
-    teleport_player = false,                                                 -- player will be teleported to the vehicle
-    vehicle_spawns = {                                                       -- vehicle spawn points
+    model = 'adder',               -- https://docs.fivem.net/docs/game-references/vehicle-models/
+    teleport_player = true,        -- player will be teleported to the vehicle
+    vehicle_spawns = {             -- vehicle spawn points
         ["1"] = vector4(-1039.02, -2727.53, 19.65, 243.17),
         ["2"] = vector4(-1043.3, -2725.09, 19.65, 241.12),
         ["3"] = vector4(-1047.57, -2722.66, 19.65, 240.54),
         ["4"] = vector4(-1034.38, -2719.0, 19.65, 240.52),
         ["5"] = vector4(-1038.51, -2716.53, 19.64, 240.34),
     },
-    fuel = 100.0,                                                            -- fuel level of the vehicle
+    fuel = 100.0, -- fuel level of the vehicle
 }
 
 ---@param vehicle any
@@ -88,5 +89,6 @@ Config.Locale = {
         ['canceled'] = 'You have canceled the starter pack',
         ['not_near_receiving_point'] = 'You are not near the receiving point',
         ['no_available_spawn'] = 'Possible area for vehicle spawn is occupied',
+        ['player_in_vehicle'] = 'You can\'t receive the starter pack while in the vehicle',
     },
 }

@@ -56,9 +56,12 @@ local function StarterVehicle(isTest)
 end
 
 
-RegisterCommand("testveh", function(source, args, raw)
-    StarterVehicle(true)
-end)
+if Config.Debug then
+    RegisterCommand("testvehspawn", function(source, args, raw)
+        StarterVehicle(true)
+    end)
+end
+
 
 local function InitializeScenario()
     local playerPed = PlayerPedId()
@@ -94,7 +97,7 @@ local function InitializeScenario()
 
             Wait(1000)
             if Config.EnableStarterVehicle then
-                StarterVehicle()
+                StarterVehicle(false)
             end
         end
     end
@@ -192,6 +195,18 @@ end
 
 if Config.UseCommand then
     RegisterCommand(Config.Command, function(source, args, raw)
+        local pedCoords = Config.Target.coords.xyz
+
+        if #(GetEntityCoords(PlayerPedId()) - pedCoords) > Config.Target.receiving_radius then
+            Config.Notification(Config.Locale[Config.Lang]['not_near_receiving_point'], 'error', false, source)
+            return
+        end
+
+        if IsPedInAnyVehicle(PlayerPedId(), true) then
+            Config.Notification(Config.Locale[Config.Lang]['player_in_vehicle'], 'error', false, source)
+            return
+        end
+
         lib.callback('cfx-tcd-starterpack:CheckPlayer', source, function(data)
             if data then
                 if lib.progressCircle({
@@ -204,7 +219,7 @@ if Config.UseCommand then
                     TriggerServerEvent("cfx-tcd-starterpack:ClaimStarterpack")
                     Wait(1000)
                     if Config.EnableStarterVehicle then
-                        StarterVehicle(true)
+                        StarterVehicle(false)
                     end
                 else
                     Config.Notification(Config.Locale[Config.Lang]['canceled'], 'inform', false, source)
