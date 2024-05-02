@@ -46,6 +46,12 @@ Config.StarterVehicle = {
     fuel = 100.0, -- fuel level of the vehicle
 }
 
+Config.EnableAlertDialog = true -- if you want to use alert dialog to give a short message to the player
+Config.Dialog = {
+    title = 'TCD Roleplay Server',
+    message = 'Welcome to the server, I hope you enjoy your stay. make sure to read the **rules** and have fun! \n\nDo you want to receive the starter pack?',
+}
+
 ---@param vehicle any
 ---@param fuel number
 ---@decription Set fuel level of the vehicle by default it uses LegacyFuel

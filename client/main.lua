@@ -7,6 +7,17 @@ local function StarterVehicle(isTest)
     local vehicleSpawns = Config.StarterVehicle.vehicle_spawns
     local isSpawned = false
 
+    local pedCoords = Config.Target.coords.xyz
+    if #(GetEntityCoords(PlayerPedId()) - pedCoords) > Config.Target.receiving_radius then
+        Config.Notification(Config.Locale[Config.Lang]['not_near_receiving_point'], 'error', false, source)
+        return
+    end
+
+    if IsPedInAnyVehicle(PlayerPedId(), true) then
+        Config.Notification(Config.Locale[Config.Lang]['player_in_vehicle'], 'error', false, source)
+        return
+    end
+
     for spawnName, spawnCoords in pairs(vehicleSpawns) do
         local closestVehicle = GetClosestVehicle(spawnCoords.x, spawnCoords.y, spawnCoords.z, 3.0, 0, 70)
         if closestVehicle == 0 then
@@ -54,14 +65,6 @@ local function StarterVehicle(isTest)
         Config.Notification(Config.Locale[Config.Lang]['no_available_spawn'], 'error', false, source)
     end
 end
-
-
-if Config.Debug then
-    RegisterCommand("testvehspawn", function(source, args, raw)
-        StarterVehicle(true)
-    end)
-end
-
 
 local function InitializeScenario()
     local playerPed = PlayerPedId()
@@ -116,22 +119,37 @@ function InitializeTarget()
                 label = Config.Target.label,
                 distance = Config.Target.distance,
                 onSelect = function()
-                    lib.callback('cfx-tcd-starterpack:CheckPlayer', false, function(data)
-                        if data then
-                            if lib.progressCircle({
-                                    duration = 3000,
-                                    position = 'bottom',
-                                    useWhileDead = false,
-                                    canCancel = true,
-                                }) then
-                                InitializeScenario()
+                    local alert = nil
+                    if Config.EnableAlertDialog then
+                        alert = lib.alertDialog({
+                            header = Config.Dialog.title,
+                            content = Config.Dialog.message,
+                            centered = true,
+                            cancel = true,
+                            size = 'xl',
+                        })
+                    end
+
+                    if alert == "confirm" or not Config.EnableAlertDialog then
+                        lib.callback('cfx-tcd-starterpack:CheckPlayer', false, function(data)
+                            if data then
+                                if lib.progressCircle({
+                                        duration = 3000,
+                                        position = 'bottom',
+                                        useWhileDead = false,
+                                        canCancel = true,
+                                    }) then
+                                    InitializeScenario()
+                                else
+                                    Config.Notification(Config.Locale[Config.Lang]['canceled'], 'inform', false, source)
+                                end
                             else
-                                Config.Notification(Config.Locale[Config.Lang]['canceled'], 'inform', false, source)
+                                Config.Notification(Config.Locale[Config.Lang]['received'], 'error', false, source)
                             end
-                        else
-                            Config.Notification(Config.Locale[Config.Lang]['received'], 'error', false, source)
-                        end
-                    end)
+                        end)
+                    else
+                        Config.Notification(Config.Locale[Config.Lang]['canceled'], 'inform', false, source)
+                    end
                 end,
                 canInteract = function()
                     if IsPedInAnyVehicle(PlayerPedId(), true) or IsEntityDead(PlayerPedId()) or lib.progressActive() then
@@ -155,24 +173,39 @@ function InitializeTarget()
                             icon = "fas fa-gift",
                             label = Config.Target.label,
                             action = function()
-                                lib.callback('cfx-tcd-starterpack:CheckPlayer', false, function(data)
-                                    if data then
-                                        if lib.progressCircle({
-                                                duration = 3000,
-                                                position = 'bottom',
-                                                useWhileDead = false,
-                                                canCancel = true,
-                                            }) then
-                                            InitializeScenario()
+                                local alert = nil
+                                if Config.EnableAlertDialog then
+                                    alert = lib.alertDialog({
+                                        header = Config.Dialog.title,
+                                        content = Config.Dialog.message,
+                                        centered = true,
+                                        cancel = true,
+                                        size = 'xl',
+                                    })
+                                end
+            
+                                if alert == "confirm" or not Config.EnableAlertDialog then
+                                    lib.callback('cfx-tcd-starterpack:CheckPlayer', false, function(data)
+                                        if data then
+                                            if lib.progressCircle({
+                                                    duration = 3000,
+                                                    position = 'bottom',
+                                                    useWhileDead = false,
+                                                    canCancel = true,
+                                                }) then
+                                                InitializeScenario()
+                                            else
+                                                Config.Notification(Config.Locale[Config.Lang]['canceled'], 'inform', false,
+                                                    source)
+                                            end
                                         else
-                                            Config.Notification(Config.Locale[Config.Lang]['canceled'], 'inform', false,
+                                            Config.Notification(Config.Locale[Config.Lang]['received'], 'error', false,
                                                 source)
                                         end
-                                    else
-                                        Config.Notification(Config.Locale[Config.Lang]['received'], 'error', false,
-                                            source)
-                                    end
-                                end)
+                                    end)
+                                else
+                                    Config.Notification(Config.Locale[Config.Lang]['canceled'], 'inform', false, source)
+                                end
                             end,
                             canInteract = function()
                                 if IsPedInAnyVehicle(PlayerPedId(), true) or IsEntityDead(PlayerPedId()) or lib.progressActive() then
@@ -207,27 +240,42 @@ if Config.UseCommand then
             return
         end
 
-        lib.callback('cfx-tcd-starterpack:CheckPlayer', source, function(data)
-            if data then
-                if lib.progressCircle({
-                        duration = 3000,
-                        position = 'bottom',
-                        useWhileDead = false,
-                        canCancel = true,
-                    })
-                then
-                    TriggerServerEvent("cfx-tcd-starterpack:ClaimStarterpack")
-                    Wait(1000)
-                    if Config.EnableStarterVehicle then
-                        StarterVehicle(false)
+        local alert = nil
+        if Config.EnableAlertDialog then
+            alert = lib.alertDialog({
+                header = Config.Dialog.title,
+                content = Config.Dialog.message,
+                centered = true,
+                cancel = true,
+                size = 'xl',
+            })
+        end
+
+        if alert == "confirm" or not Config.EnableAlertDialog then
+            lib.callback('cfx-tcd-starterpack:CheckPlayer', source, function(data)
+                if data then
+                    if lib.progressCircle({
+                            duration = 3000,
+                            position = 'bottom',
+                            useWhileDead = false,
+                            canCancel = true,
+                        })
+                    then
+                        TriggerServerEvent("cfx-tcd-starterpack:ClaimStarterpack")
+                        Wait(1000)
+                        if Config.EnableStarterVehicle then
+                            StarterVehicle(false)
+                        end
+                    else
+                        Config.Notification(Config.Locale[Config.Lang]['canceled'], 'inform', false, source)
                     end
                 else
-                    Config.Notification(Config.Locale[Config.Lang]['canceled'], 'inform', false, source)
+                    Config.Notification(Config.Locale[Config.Lang]['received'], 'error', false, source)
                 end
-            else
-                Config.Notification(Config.Locale[Config.Lang]['received'], 'error', false, source)
-            end
-        end)
+            end)
+        else
+            Config.Notification(Config.Locale[Config.Lang]['canceled'], 'inform', false, source)
+        end
     end, false)
 
     TriggerEvent('chat:addSuggestion', '/' .. Config.Command, 'Get your starter pack', {})
