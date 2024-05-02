@@ -2,43 +2,63 @@ local Core, Framework = GetCore()
 local Peds = {}
 local Targets = {}
 
-local function StarterVehicle()
+local function StarterVehicle(isTest)
     local vehicle = GetHashKey(Config.StarterVehicle.model)
-    local vehicleSpawn = Config.StarterVehicle.vehicle_spawn
-    if #(GetEntityCoords(PlayerPedId()) - vector3(vehicleSpawn.x, vehicleSpawn.y, vehicleSpawn.z)) > 10 then
-        Config.Notification(Config.Locale[Config.Lang]['not_near_receiving_point'], 'error', false, source)
-        return
+    local vehicleSpawns = Config.StarterVehicle.vehicle_spawns
+    local isSpawned = false
+
+    for spawnName, spawnCoords in pairs(vehicleSpawns) do
+        local closestVehicle = GetClosestVehicle(spawnCoords.x, spawnCoords.y, spawnCoords.z, 3.0, 0, 70)
+        if closestVehicle == 0 then
+            if Framework == 'esx' then
+                Core.Game.SpawnVehicle(vehicle, spawnCoords, spawnCoords.w, function(vehicle)
+                    if Config.StarterVehicle.teleport_player then
+                        TaskWarpPedIntoVehicle(PlayerPedId(), vehicle, -1)
+                    end
+                    Config.SetFuel(vehicle, Config.StarterVehicle.fuel)
+
+                    local vehicleData = {
+                        props = Core.Game.GetVehicleProperties(vehicle),
+                    }
+
+                    Config.GiveKey(vehicle)
+                    if not isTest then
+                        TriggerServerEvent('cfx-tcd-starterpack:ClaimVehicle', vehicleData)
+                    end
+                end)
+            else
+                Core.Functions.SpawnVehicle(vehicle, function(veh)
+                    SetEntityHeading(veh, spawnCoords.w)
+                    if Config.StarterVehicle.teleport_player then
+                        TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
+                    end
+                    Config.SetFuel(veh, Config.StarterVehicle.fuel)
+
+                    local vehicleData = {
+                        props = Core.Functions.GetVehicleProperties(veh),
+                    }
+                    Config.GiveKey(veh)
+                    if not isTest then
+                        TriggerServerEvent('cfx-tcd-starterpack:ClaimVehicle', vehicleData)
+                    end
+                end, spawnCoords, true)
+            end
+
+            isSpawned = true
+            break
+        else
+            if Config.Debug then print("^1[ERROR] ^7Spawn point '" .. spawnName .. "' is already occupied.") end
+        end
     end
-    if Framework == 'esx' then
-        Core.Game.SpawnVehicle(vehicle, vehicleSpawn, vehicleSpawn.w, function(vehicle)
-            if Config.StarterVehicle.teleport_player then
-                TaskWarpPedIntoVehicle(PlayerPedId(), vehicle, -1)
-            end
-            Config.SetFuel(vehicle, Config.StarterVehicle.fuel)
-
-            local vehicleData = {
-                props = Core.Game.GetVehicleProperties(vehicle),
-            }
-
-            Config.GiveKey(vehicle)
-            TriggerServerEvent('cfx-tcd-starterpack:ClaimVehicle', vehicleData)
-        end)
-    else
-        Core.Functions.SpawnVehicle(vehicle, function(veh)
-            SetEntityHeading(veh, vehicleSpawn.w)
-            if Config.StarterVehicle.teleport_player then
-                TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
-            end
-            Config.SetFuel(veh, Config.StarterVehicle.fuel)
-
-            local vehicleData = {
-                props = Core.Functions.GetVehicleProperties(veh),
-            }
-            Config.GiveKey(veh)
-            TriggerServerEvent('cfx-tcd-starterpack:ClaimVehicle', vehicleData)
-        end, vehicleSpawn, true)
+    if not isSpawned then
+        Config.Notification(Config.Locale[Config.Lang]['no_available_spawn'], 'error', false, source)
     end
 end
+
+
+RegisterCommand("testveh", function(source, args, raw)
+    StarterVehicle(true)
+end)
 
 local function InitializeScenario()
     local playerPed = PlayerPedId()
@@ -127,39 +147,40 @@ function InitializeTarget()
                     debugPoly = Config.Debug,
                     useZ = true,
                 }, {
-                options = {
-                    {
-                        icon = "fas fa-gift",
-                        label = Config.Target.label,
-                        action = function()
-                            lib.callback('cfx-tcd-starterpack:CheckPlayer', false, function(data)
-                                if data then
-                                    if lib.progressCircle({
-                                            duration = 3000,
-                                            position = 'bottom',
-                                            useWhileDead = false,
-                                            canCancel = true,
-                                        }) then
-                                        InitializeScenario()
+                    options = {
+                        {
+                            icon = "fas fa-gift",
+                            label = Config.Target.label,
+                            action = function()
+                                lib.callback('cfx-tcd-starterpack:CheckPlayer', false, function(data)
+                                    if data then
+                                        if lib.progressCircle({
+                                                duration = 3000,
+                                                position = 'bottom',
+                                                useWhileDead = false,
+                                                canCancel = true,
+                                            }) then
+                                            InitializeScenario()
+                                        else
+                                            Config.Notification(Config.Locale[Config.Lang]['canceled'], 'inform', false,
+                                                source)
+                                        end
                                     else
-                                        Config.Notification(Config.Locale[Config.Lang]['canceled'], 'inform', false,
+                                        Config.Notification(Config.Locale[Config.Lang]['received'], 'error', false,
                                             source)
                                     end
-                                else
-                                    Config.Notification(Config.Locale[Config.Lang]['received'], 'error', false, source)
+                                end)
+                            end,
+                            canInteract = function()
+                                if IsPedInAnyVehicle(PlayerPedId(), true) or IsEntityDead(PlayerPedId()) or lib.progressActive() then
+                                    return false
                                 end
-                            end)
-                        end,
-                        canInteract = function()
-                            if IsPedInAnyVehicle(PlayerPedId(), true) or IsEntityDead(PlayerPedId()) or lib.progressActive() then
-                                return false
+                                return true
                             end
-                            return true
-                        end
+                        },
                     },
-                },
-                distance = 2.0
-            })
+                    distance = 2.0
+                })
         else
             print("^1[ERROR] ^7Target resource not found or not started")
         end
@@ -171,11 +192,6 @@ end
 
 if Config.UseCommand then
     RegisterCommand(Config.Command, function(source, args, raw)
-        local vehicleSpawn = Config.StarterVehicle.vehicle_spawn
-        if #(GetEntityCoords(PlayerPedId()) - vector3(vehicleSpawn.x, vehicleSpawn.y, vehicleSpawn.z)) > 10 then
-            Config.Notification(Config.Locale[Config.Lang]['not_near_receiving_point'], 'error', false, source)
-            return
-        end
         lib.callback('cfx-tcd-starterpack:CheckPlayer', source, function(data)
             if data then
                 if lib.progressCircle({
@@ -188,7 +204,7 @@ if Config.UseCommand then
                     TriggerServerEvent("cfx-tcd-starterpack:ClaimStarterpack")
                     Wait(1000)
                     if Config.EnableStarterVehicle then
-                        StarterVehicle()
+                        StarterVehicle(true)
                     end
                 else
                     Config.Notification(Config.Locale[Config.Lang]['canceled'], 'inform', false, source)

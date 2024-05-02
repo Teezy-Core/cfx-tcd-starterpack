@@ -6,7 +6,7 @@ Config = {}
 ]]
 
 Config.Lang = 'en'
-Config.Debug = false                      -- if you want to see debug messages in console
+Config.Debug = true                      -- if you want to see debug messages in console
 
 Config.TargetResource = 'ox_target'       -- supported: ox_target, qb-target
 Config.InventoryResource = 'ox_inventory' -- supported: ox_inventory, qb-inventory, ps-inventory, qs-inventory
@@ -31,12 +31,18 @@ Config.StarterPackItems = { -- items that will be given to player
     { item = 'money',    amount = 5000 },
 }
 
-Config.EnableStarterVehicle = false -- if you want to give starter vehicle to player
+Config.EnableStarterVehicle = true                                          -- if you want to give starter vehicle to player
 Config.StarterVehicle = {
-    model = 'adder',               -- https://wiki.rage.mp/index.php?title=Vehicles
-    teleport_player = true,        -- player will be teleported to the vehicle
-    vehicle_spawn = vec4(-1040.123047, -2727.138428, 20.046143, 238.110229), -- vehicle spawn location and heading
-    fuel = 100.0,                  -- fuel level of the vehicle
+    model = 'adder',                                                         -- https://docs.fivem.net/docs/game-references/vehicle-models/
+    teleport_player = false,                                                 -- player will be teleported to the vehicle
+    vehicle_spawns = {                                                       -- vehicle spawn points
+        ["1"] = vector4(-1039.02, -2727.53, 19.65, 243.17),
+        ["2"] = vector4(-1043.3, -2725.09, 19.65, 241.12),
+        ["3"] = vector4(-1047.57, -2722.66, 19.65, 240.54),
+        ["4"] = vector4(-1034.38, -2719.0, 19.65, 240.52),
+        ["5"] = vector4(-1038.51, -2716.53, 19.64, 240.34),
+    },
+    fuel = 100.0,                                                            -- fuel level of the vehicle
 }
 
 ---@param vehicle any
@@ -49,7 +55,7 @@ end
 ---@param vehicle any
 ---@return string
 ---@decription If you have a custom vehicle key system you can give the key to the player
-Config.GiveKey = function (vehicle)
+Config.GiveKey = function(vehicle)
     local Core, Framework = GetCore()
     if Framework == "esx" then
         -- ESX Vehicle Key System
@@ -81,5 +87,6 @@ Config.Locale = {
         ['success'] = 'You have received your starter pack, Enjoy!',
         ['canceled'] = 'You have canceled the starter pack',
         ['not_near_receiving_point'] = 'You are not near the receiving point',
+        ['no_available_spawn'] = 'Possible area for vehicle spawn is occupied',
     },
 }
