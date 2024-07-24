@@ -1,4 +1,6 @@
 
+
+
 # Advanced Starter Pack System for FiveM
 
 
@@ -29,11 +31,18 @@ New players on your FiveM server can receive freebies with this resource. You ca
 - Includes built-in Discord logging.
 - This resource is running at idle with 0.00 ms.
 
+** 24/07/2024 ** 
+- Added by Fortified Grizzly
+
+- Added Menu selection for vehicle and starter pack, allowing people to choose from different options
+- Added in command, so that you can add all people to the list, of "claimed" to stop this being abused by veteran players
+
 ## Usage:
 1. Configure the settings according to your server's setup.
 2. Ensure proper integration with your chosen resources and frameworks.
 3. Customize the starter pack items and vehicle options to fit your server's economy and gameplay.
-4. Provide clear instructions to new players on how to claim their starter pack.
+4. Provide clear instructions to new players on how to claim their starter pack.  Command name is `AddToStarter`
+
 
 ## Config Screenshot
 
