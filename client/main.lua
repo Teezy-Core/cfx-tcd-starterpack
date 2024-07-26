@@ -51,7 +51,7 @@ function ShowVehicleMenu(callback)
 end
 
 function StarterVehicle(isTest, selectedVehicleModel)
-    local vehicleModel = selectedVehicleModel or Config.StarterVehicle.model
+    local vehicleModel = selectedVehicleModel
     local vehicle = GetHashKey(vehicleModel)
     local vehicleSpawns = Config.StarterVehicle.vehicle_spawns
     local isSpawned = false

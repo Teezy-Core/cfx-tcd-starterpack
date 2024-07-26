@@ -194,7 +194,7 @@ AddEventHandler("cfx-tcd-starterpack:ClaimVehicle", function(vehicleData, model)
             ['@license'] = Player.PlayerData.license,
             ['@citizenid'] = identifier,
             ['@vehicle'] = model, -- Ensure model is saved correctly
-            ['@hash'] = GetHashKey(vehicleData.props.model),
+            ['@hash'] = GetHashKey(model),
             ['@mods'] = '{}',
             ['@plate'] = vehicleData.props.plate,
             ['@garage'] = 'pillboxgarage'
