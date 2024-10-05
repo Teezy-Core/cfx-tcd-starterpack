@@ -1,40 +1,38 @@
 
 # Advanced Starter Pack System for FiveM
+The Advanced Starterpack System is a comprehensive solution for FiveM servers, providing a customizable starter pack system for players.
 
+[![Teezy-Core - cfx-tcd-starterpack](https://img.shields.io/static/v1?label=Teezy-Core&message=cfx-tcd-starterpack&color=blue&logo=github)](https://github.com/Teezy-Core/cfx-tcd-starterpack "Go to GitHub repo")
+[![stars - cfx-tcd-starterpack](https://img.shields.io/github/stars/Teezy-Core/cfx-tcd-starterpack?style=social)](https://github.com/Teezy-Core/cfx-tcd-starterpack)
+[![forks - cfx-tcd-starterpack](https://img.shields.io/github/forks/Teezy-Core/cfx-tcd-starterpack?style=social)](https://github.com/Teezy-Core/cfx-tcd-starterpack)
+[![GitHub release](https://img.shields.io/github/release/Teezy-Core/cfx-tcd-starterpack?include_prereleases=&sort=semver&color=blue)](https://github.com/Teezy-Core/cfx-tcd-starterpack/releases/)
+[![License](https://img.shields.io/badge/License-MIT-blue)](#license)
+[![issues - cfx-tcd-starterpack](https://img.shields.io/github/issues/Teezy-Core/cfx-tcd-starterpack)](https://github.com/Teezy-Core/cfx-tcd-starterpack/issues)
 
+![App Screenshot](https://forum-cfx-re.akamaized.net/original/5X/a/e/9/4/ae9442c817722d17e5ece16989af5b03f00ee1e6.jpeg)
 
-[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://choosealicense.com/licenses/gpl-3.0/) 
+# Documentations
+https://tcdev.gitbook.io/tcd-documentation/free-release/advanced-starterpack-system
 
-This resource provides an advanced starter pack system for FiveM servers utilizing QBCore and ESX Frameworks.
+# Download
+https://github.com/Teezy-Core/cfx-tcd-starterpack/releases
 
-New players on your FiveM server can receive freebies with this resource. You can configure which items you would like to give to the new players.
+# Features
+The Advanced Starterpack System includes the following features:
 
-
-
-## Features
-
-- **Language Configuration:** Set the language for notifications.
-- **Debug Mode:** Toggle debug messages in the console.
-- **Integration Options:**
-  - Target Resource: Choose between 'ox_target' and 'qb-target'.
-  - Inventory Resource: Choose between 'ox_inventory', 'qb-inventory', and 'ps-inventory'.
-  - SQL Resource: Choose between 'oxmysql', 'mysql-async', and 'ghmattimysql'.
-- **Command Usage:** Enable or disable the command to give starter packs to players.
-- **Customizable Starter Pack:**
-  - Define items and quantities to be given to new players.
+- Multiple Locations: Define multiple locations where players can receive their starter packs.
+- Customizable Starter Pack:
+  - Define the items and vehicles included in each starter pack.
   - Set up a designated NPC with customizable appearance and location for players to receive their starter pack.
-- **Starter Vehicle Option:** Provide a starter vehicle to players with customizable options such as model, fuel level, and teleportation.
-- **LegacyFuel Compatibility:** Easily integrate with LegacyFuel to manage vehicle fuel levels.
-- **Notification System:** Customizable notification system based on server framework (ESX or QBCore).
+- Integration Options: 
+  - Target Resource: Choose between 'ox_target' and 'qb-target'. 
+  - Inventory Resource: Choose between 'ox_inventory', 'qb-inventory', and 'ps-inventory', 'qs-inventory'`.
+  - SQL Resource: Choose between 'oxmysql', 'mysql-async', and 'ghmattimysql'.
+- Starter Vehicle Option: Provide a starter vehicle to players with customizable options such as model, fuel level, and teleportation.
+- Command System: Give players their starter packs using a custom command.
+- Fuel System: Set the fuel level of vehicles using a custom fuel resource.
+- Notification System: Send notifications to players using a custom notification system.
+- Debug Mode: Toggle debug messages in the console.
 - Includes built-in Discord logging.
 - This resource is running at idle with 0.00 ms.
-
-## Usage:
-1. Configure the settings according to your server's setup.
-2. Ensure proper integration with your chosen resources and frameworks.
-3. Customize the starter pack items and vehicle options to fit your server's economy and gameplay.
-4. Provide clear instructions to new players on how to claim their starter pack.
-
-## Config Screenshot
-
-![App Screenshot](https://i.imgur.com/ePUUXGK.png)
+- And More!!
