@@ -1,0 +1,10 @@
+{
+    "already_received": "You have already received your starter pack",
+    "success": "You have received your starter pack, Enjoy!",
+    "progress_cancelled": "You have cancelled the starter pack progress",
+    "not_near_receiving_point": "You are not near the receiving point",
+    "no_available_spawn": "Possible area for vehicle spawn is occupied",
+    "player_in_vehicle": "You can't receive the starter pack while in the vehicle",
+    "safezone_enter": "You have entered the safezone",
+    "safezone_exit": "You are no longer in a safe zone"
+}

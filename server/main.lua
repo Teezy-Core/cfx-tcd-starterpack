@@ -1,173 +1,191 @@
-Core, Framework = GetCore()
+local Core, Framework = GetCore()
 
-lib.callback.register('cfx-tcd-starterpack:CheckPlayer', function(source)
-    local Player = Framework == "esx" and Core.GetPlayerFromId(source) or Core.Functions.GetPlayer(source)
-    local identifier = Framework == "esx" and Player.identifier or Player.PlayerData.citizenid
+lib.locale()
 
+-- [[ FUNCTIONS ]] --
+local function updatePlayerData(license, received)
+    local query = "UPDATE tcd_starterpack SET received = ?, date_received = ? WHERE identifier = ?"
+    local params = { received, os.date("%Y-%m-%d %H:%M:%S", os.time()), license }
+
+    ExecuteQuery(query, params, function()
+        debugPrint("success", "Player data has been updated")
+    end)
+end
+
+local function initializeStarterPackData(license)
     local query = "SELECT * FROM tcd_starterpack WHERE identifier = ?"
-    local params = { identifier }
+    local params = { license }
 
     local response = FetchQuery(query, params)
-    if not response or #response == 0 then
-        if Config.Debug then print("^1[DEBUG] ^7Player not found in the database, adding them now") end
 
-        local insertQuery = "INSERT INTO tcd_starterpack (identifier, received) VALUES (?, ?)"
-        local insertParams = { identifier, 0 }
-
-        InsertQuery(insertQuery, insertParams, function(rowsAffected)
-            if rowsAffected > 0 then
-                if Config.Debug then print("^2[DEBUG] ^7Added new row for player: " .. identifier) end
-            else
-                if Config.Debug then print("^1[DEBUG] ^7Failed to add new row for player: " .. identifier) end
-            end
-        end)
-
+    if response[1] then
         return true
     else
-        for i = 1, #response do
-            local row = response[i]
-            if not row.received then
-                return true
-            else
-                return false
-            end
-        end
+        local insertQuery = "INSERT INTO tcd_starterpack (identifier, received, date_received) VALUES (?, ?, ?)"
+        local insertParams = { license, 0, nil }
+
+        ExecuteQuery(insertQuery, insertParams, function()
+            debugPrint("success", "Player has received the starter pack")
+        end)
+        return false
     end
-end)
+end
 
-local function SendDiscordLog(source, desc)
-    local time = os.date("%c")
-    local webhook = DiscordConfig.webhook
-    local title = DiscordConfig.title
-    local thumbnail_url = DiscordConfig.thumbnail
-    local color = DiscordConfig.color
+local function giveItems(src, type)
+    local data = Config.StarterPackItems[type]
 
-    if not webhook then
-        print("^1[ERROR] ^7Discord Webhook is not set")
+    if not data then
+        error("Invalid starter pack type, please check your config.lua")
         return
     end
 
-    if Config.Debug then print("^1[DEBUG] ^7Sending Discord Log") end
+    for _, item in ipairs(data) do
+        debugPrint("info", "Giving item: " .. item.item .. " x" .. item.amount)
 
-    local embed = {
-        {
-            ["author"] = {
-                ["name"] = "Teezy Core Development",
-                ["icon_url"] = "https://i.imgur.com/6s82WUZ.png",
-            },
-            ["color"] = tonumber(color),
-            ["title"] = title,
-            ["description"] = desc,
-            ["thumbnail"] = {
-                ["url"] = thumbnail_url,
-            },
-            ["fields"] = {
-                {
-                    ["name"] = "Player: ",
-                    ["value"] = "```" .. GetPlayerName(source) .. "```",
-                    ["inline"] = true
-                },
-                {
-                    ["name"] = "Server ID: ",
-                    ["value"] = "```" .. source .. "```",
-                    ["inline"] = true
-                },
-                {
-                    ["name"] = "License ID:",
-                    ["value"] = "```" .. GetPlayerIdentifiers(source)[1] .. "```",
-                    ["inline"] = false
-                },
-                {
-                    ["name"] = "Time",
-                    ["value"] = time,
-                    ["inline"] = true
-                },
-            },
-            ["timestamp"] = os.date('!%Y-%m-%dT%H:%M:%SZ'),
-            ["footer"] = {
-                ["text"] = "Powered by TCD",
-                ["icon_url"] = "https://i.imgur.com/6s82WUZ.png",
-            },
-        }
-    }
-    PerformHttpRequest(webhook,
-        function(err, text, headers) end, 'POST', json.encode({ embeds = embed }),
-        { ['Content-Type'] = 'application/json' })
-end
-
-function UpdateRecevied(Player)
-    local identifier = Framework == "esx" and Player.identifier or Player.PlayerData.citizenid
-    local currentDate = os.date("%m/%d/%Y")
-    local query = "UPDATE tcd_starterpack SET received = ?, date_received = ? WHERE identifier = ?"
-    local params = { 1, currentDate, identifier }
-
-    ExecuteQuery(query, params)
-
-    if Config.Debug then print("^2[DEBUG] ^7Updated received status for player: " .. identifier) end
-end
-
-RegisterServerEvent("cfx-tcd-starterpack:ClaimVehicle")
-AddEventHandler("cfx-tcd-starterpack:ClaimVehicle", function(vehicleData)
-    local Player = Framework == "esx" and Core.GetPlayerFromId(source) or Core.Functions.GetPlayer(source)
-    local identifier = Framework == "esx" and Player.identifier or Player.PlayerData.citizenid
-
-    if Framework == 'esx' then
-        local query = "INSERT INTO owned_vehicles (owner, plate, vehicle) VALUES (@owner, @plate, @vehicle)"
-        local params = {
-            ['@owner'] = identifier,
-            ['@plate'] = vehicleData.props.plate,
-            ['@vehicle'] = json.encode(vehicleData.props)
-        }
-        InsertQuery(query, params)
-    else
-        local query =
-        "INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, garage) VALUES (@license, @citizenid, @vehicle, @hash, @mods, @plate, @garage)"
-        local params = {
-            ['@license'] = Player.PlayerData.license,
-            ['@citizenid'] = identifier,
-            ['@vehicle'] = Config.StarterVehicle.model,
-            ['@hash'] = GetHashKey(vehicleData.props.model),
-            ['@mods'] = '{}',
-            ['@plate'] = vehicleData.props.plate,
-            ['@garage'] = 'pillboxgarage'
-        }
-        InsertQuery(query, params)
-    end
-end)
-
-RegisterServerEvent("cfx-tcd-starterpack:ClaimStarterpack")
-AddEventHandler("cfx-tcd-starterpack:ClaimStarterpack", function()
-    local src = source
-    local Player = Framework == "esx" and Core.GetPlayerFromId(src) or Core.Functions.GetPlayer(src)
-
-    for i = 1, #Config.StarterPackItems do
-        local item = Config.StarterPackItems[i].item
-        local amount = Config.StarterPackItems[i].amount
-
-        if Config.InventoryResource == 'ox_inventory' and GetResourceState(Config.InventoryResource) == 'started' then
-            local success, response = exports.ox_inventory:AddItem(src, item, amount)
+        if Config.InventoryResource == "ox_inventory" and GetResourceState(Config.InventoryResource) == 'started' then
+            local success, response = exports.ox_inventory:AddItem(src, item.item, item.amount)
             if not success then
                 if response == 'invalid_item' then
-                    print("^1[ERROR] ^7Invalid item: " .. item)
+                    error("Invalid item: " .. item.item)
                 end
             end
-        elseif Config.InventoryResource == 'qb-inventory' or Config.InventoryResource == 'ps-inventory' and GetResourceState(Config.InventoryResource) == 'started' then
-            local itemInfo = Core.Shared.Items[item]
-            if itemInfo then
-                Player.Functions.AddItem(item, amount)
-                TriggerClientEvent('inventory:client:ItemBox', src, itemInfo, 'add', amount)
-            else
-                print("^1[ERROR] ^7Invalid item: " .. item)
+        elseif Config.InventoryResource == "qb-inventory" and GetResourceState(Config.InventoryResource) == 'started' then
+            local itemInfo = Core.Shared.Items[item.item]
+
+            if not itemInfo then
+                error("Invalid item: " .. item.item .. " make sure the item exists in your inventory resource")
             end
-        elseif Config.InventoryResource == 'qs-inventory' and GetResourceState(Config.InventoryResource) == 'started' then
-            exports['qs-inventory']:AddItem(src, item, amount)
-            -- I don't have qs-inventory so I can't test this, and add error handling for this
+
+            exports['qb-inventory']:AddItem(src, item.item, item.amount, false, false, 'tcd-starterpack')
+            TriggerClientEvent('qb-inventory:client:ItemBox', src, itemInfo, 'add')
+        elseif Config.InventoryResource == "ps-inventory" and GetResourceState(Config.InventoryResource) == 'started' then
+            local itemInfo = Core.Shared.Items[item]
+
+            if not itemInfo then
+                error("Invalid item: " .. item.item .. " make sure the item exists in your inventory resource")
+            end
+
+            exports['ps-inventory']:AddItem(src, item.item, item.amount, false, false, 'tcd-starterpack')
+            TriggerClientEvent('ps-inventory:client:ItemBox', src, itemInfo, 'add')
+        elseif Config.InventoryResource == "qs-inventory" and GetResourceState(Config.InventoryResource) == 'started' then
+            exports['qs-inventory']:AddItem(src, item.item, item.amount)
         else
-            error(Config.InventoryResource .. " is not found or not started", 2)
+            error("Inventory resource not found, please set your inventory resource in the config.lua")
         end
     end
+end
 
-    UpdateRecevied(Player)
-    SendDiscordLog(src, "Player has received their starter pack")
-    Config.Notification(Config.Locale[Config.Lang]['success'], 'success', true, source)
+local function giveVehicle(identifier, data, stored)
+    if Framework == "esx" then
+        local query = "INSERT INTO owned_vehicles (owner, plate, vehicle, parking, stored) VALUES (?, ?, ?, ?, ?)"
+        local params = { identifier, data.props.plate, json.encode(data.props), data.parking, stored }
+
+        InsertQuery(query, params)
+    elseif Framework == "qbc" then
+        local Player = Framework == "esx" and Core.GetPlayerFromId(source) or Core.Functions.GetPlayer(source)
+        local citizenId = Framework == "esx" and Player.identifier or Player.PlayerData.citizenid
+
+        local query = "INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, garage) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        local params = { Player.PlayerData.license, citizenId, data.vehicle_name, GetHashKey(data.vehicle_name), json.encode(data.props), data.props.plate, data.parking }
+
+        InsertQuery(query, params, function(rowsAffected)
+            if rowsAffected > 0 then
+                debugPrint("success", "Vehicle has been added to the database")
+            else
+                error("Failed to add vehicle to the database")
+            end
+        end)
+    end
+end
+-- [[ END FUNCTIONS ]] --
+
+-- [[ EVENTS ]] --
+RegisterNetEvent('cfx-tcd-starterpack:Server:ClaimVehicle', function(vehicleData)
+    local src = source
+    local Player = Framework == "esx" and Core.GetPlayerFromId(src) or Core.Functions.GetPlayer(src)
+    local identifier = Framework == "esx" and Player.identifier or Player.PlayerData.citizenid
+
+    lib.callback("cfx-tcd-starterpack:CB:CheckReceivingRadius", src, function(result)
+        if not result then
+            debugPrint("error", "Player is not in the receiving radius")
+            Config.Notification(locale("not_near_receiving_point"), "error", false, src)
+            return
+        end
+
+        giveVehicle(identifier, vehicleData, false)
+    end)
 end)
+
+RegisterNetEvent('cfx-tcd-starterpack:Server:ClaimStarterpack', function(starterpack_type)
+    local src = source
+    local license = GetPlayerLicense(src)
+
+    if HasReceivedStarterPack(license) then
+        debugPrint("info", "Player has already received the starter pack")
+        Config.Notification(locale("already_received"), "error", false, src)
+        return
+    end
+
+    lib.callback("cfx-tcd-starterpack:CB:CheckReceivingRadius", src, function(result)
+        if not result then
+            debugPrint("error", "Player is not in the receiving radius")
+            Config.Notification(locale("not_near_receiving_point"), "error", false, src)
+            return
+        end
+
+        giveItems(src, starterpack_type)
+    end)
+
+    updatePlayerData(license, true)
+    SendDiscordLog(src, "Player has received their starter pack")
+    Config.Notification(locale("success"), "success", true, src)
+end)
+-- [[ END EVENTS ]] --
+
+
+-- [[ CALLBACKS ]] --
+lib.callback.register('cfx-tcd-starterpack:CB:CheckPlayer', function(source)
+    local license = GetPlayerLicense(source)
+
+    initializeStarterPackData(license)
+    return HasReceivedStarterPack(license)
+end)
+-- [[ END CALLBACKS ]] --
+
+-- [[ COMMANDS ]] --
+if Config.CommandConfig.enable then
+    lib.addCommand(Config.CommandConfig.command, {
+        help = Config.CommandConfig.command_help,
+    }, function(source, args, raw)
+        local src = source
+        local license = GetPlayerLicense(src)
+
+        initializeStarterPackData(license)
+
+        if HasReceivedStarterPack(license) then
+            debugPrint("info", "Player has already received the starter pack")
+            Config.Notification(locale("already_received"), "error", true, src)
+            return
+        end
+
+        lib.callback("cfx-tcd-starterpack:CB:CheckReceivingRadius", src, function(result)
+            if not result then
+                debugPrint("error", "Player is not in the receiving radius")
+                Config.Notification(locale("not_near_receiving_point"), "error", true, src)
+                return
+            end
+
+            giveItems(src, Config.CommandConfig.starterpack_type)
+            if Config.CommandConfig.starter_vehicle.enable then
+                TriggerClientEvent('cfx-tcd-starterpack:Client:GiveStarterVehicle', src, Config.CommandConfig.starter_vehicle)
+            end
+
+            updatePlayerData(license, true)
+            SendDiscordLog(src, "Player has received their starter pack")
+            Config.Notification(locale("success"), "success", true, src)
+        end)
+    end)
+end
+
+CheckTable()
+lib.versionCheck('Teezy-Core/cfx-tcd-starterpack')

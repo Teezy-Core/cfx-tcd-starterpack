@@ -2,31 +2,35 @@ fx_version 'cerulean'
 game 'gta5'
 
 name "cfx-tcd-starterpack"
-description "A Advanced Starter Pack System for QBCore and ESX Framework"
+description "A Advanced Starter Pack System for QBCore, ESX, and QBOX Frameworks"
 author "Teezy Core Development"
-version "1.3.0"
+version "2.0.0"
 
 shared_scripts {
 	'@ox_lib/init.lua',
+	'shared/*.lua',
 	'config.lua'
 }
 
 client_scripts {
-	'core.lua',
-	'client/*.lua'
+	'client/**/*.lua',
 }
 
 server_scripts {
-	'@mysql-async/lib/MySQL.lua',
-	'core.lua',
-	'server/*.lua'
+	'@oxmysql/lib/MySQL.lua',
+	'server/**/*.lua',
+}
+
+files {
+	'locales/*.json',
 }
 
 escrow_ignore {
+	'locales/*.json',
 	'config.lua',
-	'core.lua',
-	'client/*.lua',
-	'server/*.lua'
+	'shared/*.lua',
+	'client/**/*.lua',
+	'server/**/*.lua',
 }
 
 dependencies {
