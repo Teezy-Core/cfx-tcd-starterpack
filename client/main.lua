@@ -7,7 +7,7 @@ lib.locale()
 
 -- [[ FUNCTIONS ]] --
 local function giveVehicleStarter(data)
-    local vehicle = GetHashKey(data.starter_vehicle.model)
+    local vehicle = nil
     local vehicleSpawns = data.starter_vehicle.vehicle_spawns
     local isSpawn = false
 
@@ -18,6 +18,18 @@ local function giveVehicleStarter(data)
         return
     end
 
+    if data.starter_vehicle.random_vehicle then
+        debugPrint("info", "Random vehicle is enabled")
+
+        local random = math.random(1, #Config.RandomVehicles.vehicles)
+        vehicle = GetHashKey(Config.RandomVehicles.vehicles[random])
+
+        debugPrint("info", "Random vehicle: " .. Config.RandomVehicles.vehicles[random])
+    else
+        debugPrint("info", "Random vehicle is disabled")
+        vehicle = GetHashKey(data.starter_vehicle.model)
+    end
+    
     for spawnName, spawnCoords in pairs(vehicleSpawns) do
         local closestVehicle = GetClosestVehicle(spawnCoords.x, spawnCoords.y, spawnCoords.z, 3.0, 0, 70)
         if closestVehicle == 0 then

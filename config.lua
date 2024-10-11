@@ -7,13 +7,13 @@ Config = {}
     Documentation: https://tcdev.gitbook.io/tcd-documentation/free-release/advanced-starterpack-system
 ]]
 
-Config.Debug = false                       -- enable debug mode to see more information in the console
+Config.Debug = false                      -- enable debug mode to see more information in the console
 
 Config.TargetResource = 'ox_target'       -- supported: ox_target, qb-target
 Config.InventoryResource = 'ox_inventory' -- supported: ox_inventory, qb-inventory, ps-inventory, qs-inventory
 Config.SQLResource = 'oxmysql'            -- supported: oxmysql, mysql-async, ghmattimysql
 
-Config.UsePlayerLicense = true           -- if you want to use player license to check if they have received the starter pack or not
+Config.UsePlayerLicense = true            -- if you want to use player license to check if they have received the starter pack or not
 
 Config.UseTarget = true                   -- enable target system to interact with the peds
 
@@ -30,43 +30,59 @@ Config.CommandConfig = {                  -- command to give the starter package
 }
 
 Config.Locations = {
-    ["1"] = {                              -- Unique identifier for the location
-        starterpack_type = 'normal',        -- Type of starter pack given to the player
-        label            = 'Get your starter pack', -- Target label (shown to the player)
-        icon             = 'fa-solid fa-gift',      -- Target icon (from FontAwesome)
+    ["1"] = {                                                                       -- Unique identifier for the location
+        starterpack_type = 'normal',                                                -- Type of starter pack given to the player
+        label            = 'Get your starter pack',                                 -- Target label (shown to the player)
+        icon             = 'fa-solid fa-gift',                                      -- Target icon (from FontAwesome)
 
         coords           = vec4(-1040.479126, -2731.582520, 20.164062, 238.110229), -- Coordinates and heading of the NPC (ped)
 
-        ped              = {                       -- Settings for the ped (NPC)
-            model = 'a_m_y_business_03',           -- Ped model (see the FiveM ped model list)
-            scenario = 'WORLD_HUMAN_CLIPBOARD',    -- Ped scenario (animation/behavior)
-            heading = 238.110229,                  -- Direction the ped is facing
+        ped              = {                                                        -- Settings for the ped (NPC)
+            model = 'a_m_y_business_03',                                            -- Ped model (see the FiveM ped model list)
+            scenario = 'WORLD_HUMAN_CLIPBOARD',                                     -- Ped scenario (animation/behavior)
+            heading = 238.110229,                                                   -- Direction the ped is facing
         },
 
-        safezone         = {                       -- Safe zone settings (optional)
-            enable = false,                        -- Enable or disable the safe zone
-            zone_points = {}                       -- Define safe zone points (if enabled)
+        safezone         = { -- Safe zone settings (optional)
+            enable = false,  -- Enable or disable the safe zone
+            zone_points = {} -- Define safe zone points (if enabled)
         },
 
-        starter_vehicle  = {                       -- Vehicle settings for players receiving a starter vehicle
-            enable = true,                         -- Enable or disable the starter vehicle
-            model = 'adder',                       -- Vehicle model (from FiveM vehicle model list)
-            teleport_player = false,               -- Teleport player to the vehicle (true/false)
-            parking = "pillboxgarage",             -- Parking location name for storing the vehicle in the database
-            vehicle_spawns = {                     -- Spawn points for the vehicle (multiple spawn locations)
+        starter_vehicle  = {           -- Vehicle settings for players receiving a starter vehicle
+            enable = true,             -- Enable or disable the starter vehicle
+            model = 'adder',           -- Vehicle model (from FiveM vehicle model list)
+            random_vehicle = true,     -- Spawn a random vehicle from the list (true/false)
+            teleport_player = false,   -- Teleport player to the vehicle (true/false)
+            parking = "pillboxgarage", -- Parking location name for storing the vehicle in the database
+            vehicle_spawns = {         -- Spawn points for the vehicle (multiple spawn locations)
                 vec4(-1039.02, -2727.53, 19.65, 243.17),
                 vec4(-1043.3, -2725.09, 19.65, 241.12),
                 vec4(-1047.57, -2722.66, 19.65, 240.54),
                 vec4(-1034.38, -2719.0, 19.65, 240.52),
                 vec4(-1038.51, -2716.53, 19.64, 240.34),
             },
-            fuel = 100.0,                          -- Fuel level of the vehicle when spawned
+            fuel = 100.0, -- Fuel level of the vehicle when spawned
         },
 
-        receiving_radius = 20.0,                   -- Radius around the location where players can receive the starter pack
-        distance         = 2.0,                    -- Distance from the ped to interact with it
+        receiving_radius = 20.0, -- Radius around the location where players can receive the starter pack
+        distance         = 2.0,  -- Distance from the ped to interact with it
     },
     -- add more locations here
+}
+
+Config.RandomVehicles = { -- list of vehicles to be given randomly to the player
+    vehicles = {
+        "adder",
+        "zentorno",
+        "t20",
+        "osiris",
+        "reaper",
+        "tempesta",
+        "italigtb",
+        "italigtb2",
+        "nero",
+        -- add more vehicles here
+    }
 }
 
 Config.StarterPackItems = { -- items that will be given to player
