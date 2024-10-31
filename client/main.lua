@@ -1,7 +1,7 @@
 local Core, Framework = GetCore()
-local Peds = {}
-local Targets = {}
-local IsBusy = false
+
+local Peds, Targets = {}, {}
+local IsBusy, PedSpawned = false, false
 
 lib.locale()
 
@@ -41,7 +41,7 @@ local function giveVehicleStarter(data)
 
                     local vehicleData = {
                         props = Core.Game.GetVehicleProperties(vehicle),
-                        parking = data.starter_vehicle.parking
+                        parking = data.starter_vehicle.parking and data.starter_vehicle.parking or nil
                     }
 
                     Config.SetFuel(vehicle, data.starter_vehicle.fuel)
@@ -59,7 +59,7 @@ local function giveVehicleStarter(data)
 
                     local vehicleData = {
                         props = Core.Functions.GetVehicleProperties(veh),
-                        parking = data.starter_vehicle.parking,
+                        parking = data.starter_vehicle.parking and data.starter_vehicle.parking or nil,
                         vehicle_name = data.starter_vehicle.model
                     }
 
@@ -256,8 +256,14 @@ end
 
 -- [[ EVENTS ]] --
 RegisterNetEvent("cfx-tcd-starterpack:Client:GiveStarterVehicle", function(data)
-    local vehicle = GetHashKey(data.model)
+    local vehicle = nil
 
+    if data.random_vehicle then
+        local random = math.random(1, #Config.RandomVehicles.vehicles)
+        vehicle = GetHashKey(Config.RandomVehicles.vehicles[random])
+    else
+        vehicle = GetHashKey(data.model)
+    end
     if Framework == "esx" then
         Core.Game.SpawnVehicle(vehicle, cache.coords, cache.heading, function(vehicle)
             TaskWarpPedIntoVehicle(cache.ped, vehicle, -1)
@@ -266,7 +272,7 @@ RegisterNetEvent("cfx-tcd-starterpack:Client:GiveStarterVehicle", function(data)
 
             local vehicleData = {
                 props = Core.Game.GetVehicleProperties(vehicle),
-                parking = data.parking,
+                parking = data.parking and data.parking or nil
             }
 
             TriggerServerEvent("cfx-tcd-starterpack:Server:ClaimVehicle", vehicleData)
@@ -279,7 +285,7 @@ RegisterNetEvent("cfx-tcd-starterpack:Client:GiveStarterVehicle", function(data)
 
             local vehicleData = {
                 props = Core.Functions.GetVehicleProperties(vehicle),
-                parking = data.parking,
+                parking = data.parking and data.parking or nil,
                 vehicle_name = data.model
             }
 
@@ -348,7 +354,23 @@ for _, location in pairs(Config.Locations) do
 
     function zone:onEnter()
         debugPrint("info", "Player entered the zone")
-        intializeTargetWithPed(location)
+
+        if location.ped.show_only_for_newbie then
+            lib.callback("cfx-tcd-starterpack:CB:CheckPlayer", false, function(result)
+                if not result then
+                    debugPrint("info", "Player is eligible to receive the starter pack")
+                    if not PedSpawned then
+                        intializeTargetWithPed(location)
+                        PedSpawned = true
+                    end
+                end
+            end)
+        else
+            if not PedSpawned then
+                intializeTargetWithPed(location)
+                PedSpawned = true
+            end
+        end
     end
 
     function zone:onExit()
@@ -359,15 +381,16 @@ for _, location in pairs(Config.Locations) do
 
         for _, target in ipairs(Targets) do
             debugPrint("info", "Removing target: " .. target.name)
-            if Framework == "esx" then
-                exports.ox_target:removeModel(target.model, target.name)
-            elseif Framework == "qbcore" then
-                exports['qb-target']:RemoveTargetModel(target.model, target.name)
+            if Config.TargetResource == 'ox_target' and GetResourceState(Config.TargetResource) == 'started' then
+                exports.ox_target:removeModel(target.model)
+            elseif Config.TargetResource == 'qb-target' and GetResourceState(Config.TargetResource) == 'started' then
+                exports['qb-target']:RemoveTargetModel(target.model)
             end
         end
 
         Peds = {}
         Targets = {}
+        PedSpawned = false
     end
 
     zones[#zones + 1] = zone

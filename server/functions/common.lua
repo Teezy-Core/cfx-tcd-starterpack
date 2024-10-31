@@ -113,3 +113,43 @@ function HasReceivedStarterPack(license)
         return false
     end
 end
+
+function CheckForUpdates()
+    PerformHttpRequest("https://api.github.com/repos/Teezy-Core/cfx-tcd-starterpack/releases/latest",
+        function(statusCode, responseText, headers)
+            if statusCode == 200 then
+                local response = json.decode(responseText)
+                local latestVersion = response.tag_name
+
+                if latestVersion:sub(1, 1) == "v" then
+                    latestVersion = latestVersion:sub(2)
+                end
+
+                local currentVersion = GetResourceMetadata(GetCurrentResourceName(), "version", 0)
+
+                if currentVersion and latestVersion then
+                    if currentVersion ~= latestVersion then
+                        print("^5********************** [ADVANCED STARTERPACK SYSTEM] **********************^0")
+                        warn("A new version is available: " .. latestVersion ..
+                            ". You are currently using: " .. currentVersion)
+                        warn("\n Please download the latest version from: " ..
+                            response.html_url)
+                        print("^5****************************************************************************^0")
+                    else
+                        print("^5********************** [ADVANCED STARTERPACK SYSTEM] **********************^0")
+                        print("^5You are using the latest version: " .. currentVersion)
+                        print("^5****************************************************************************^0")
+                    end
+                else
+                    print("^5********************** [ADVANCED STARTERPACK SYSTEM] **********************^0")
+                    warn("^Could not retrieve the current version.")
+                    print("^5****************************************************************************^0")
+                end
+            else
+                print("^5********************** [ADVANCED STARTERPACK SYSTEM] **********************^0")
+                warn("Failed to fetch the latest version: HTTP " .. statusCode ..
+                    ". Please check the latest version from the GitHub repository.")
+                print("^5****************************************************************************^0")
+            end
+        end, "GET", "", { ["User-Agent"] = "FiveM" })
+end

@@ -32,6 +32,8 @@ local function initializeStarterPackData(license)
 end
 
 local function giveItems(src, type)
+    if not type then return end
+
     local data = Config.StarterPackItems[type]
 
     if not data then
@@ -77,6 +79,18 @@ end
 
 local function giveVehicle(identifier, data, stored)
     if Framework == "esx" then
+        local query_parking = "SELECT parking FROM owned_vehicles LIMIT 1"
+        local response = FetchQuery(query_parking)
+        if not response[1] then
+            error("Parking column not found in the database")
+
+            local query = "ALTER TABLE owned_vehicles ADD COLUMN parking VARCHAR(255) DEFAULT NULL"
+            ExecuteQuery(query)
+
+            print("Parking column has been added to the database")
+            return
+        end
+
         local query = "INSERT INTO owned_vehicles (owner, plate, vehicle, parking, stored) VALUES (?, ?, ?, ?, ?)"
         local params = { identifier, data.props.plate, json.encode(data.props), data.parking, stored }
 
@@ -85,8 +99,10 @@ local function giveVehicle(identifier, data, stored)
         local Player = Framework == "esx" and Core.GetPlayerFromId(source) or Core.Functions.GetPlayer(source)
         local citizenId = Framework == "esx" and Player.identifier or Player.PlayerData.citizenid
 
-        local query = "INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, garage) VALUES (?, ?, ?, ?, ?, ?, ?)"
-        local params = { Player.PlayerData.license, citizenId, data.vehicle_name, GetHashKey(data.vehicle_name), json.encode(data.props), data.props.plate, data.parking }
+        local query =
+        "INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, garage) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        local params = { Player.PlayerData.license, citizenId, data.vehicle_name, GetHashKey(data.vehicle_name), json
+            .encode(data.props), data.props.plate, data.parking }
 
         InsertQuery(query, params, function(rowsAffected)
             if rowsAffected > 0 then
@@ -133,7 +149,10 @@ RegisterNetEvent('cfx-tcd-starterpack:Server:ClaimStarterpack', function(starter
             return
         end
 
-        giveItems(src, starterpack_type)
+        if starterpack_type then
+            giveItems(src, starterpack_type)
+        end
+        
     end)
 
     updatePlayerData(license, true)
@@ -177,7 +196,8 @@ if Config.CommandConfig.enable then
 
             giveItems(src, Config.CommandConfig.starterpack_type)
             if Config.CommandConfig.starter_vehicle.enable then
-                TriggerClientEvent('cfx-tcd-starterpack:Client:GiveStarterVehicle', src, Config.CommandConfig.starter_vehicle)
+                TriggerClientEvent('cfx-tcd-starterpack:Client:GiveStarterVehicle', src,
+                    Config.CommandConfig.starter_vehicle)
             end
 
             updatePlayerData(license, true)
@@ -188,4 +208,6 @@ if Config.CommandConfig.enable then
 end
 
 CheckTable()
-lib.versionCheck('Teezy-Core/cfx-tcd-starterpack')
+if Config.CheckVersion then
+    CheckForUpdates()
+end
