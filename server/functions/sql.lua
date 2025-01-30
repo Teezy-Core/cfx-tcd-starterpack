@@ -82,14 +82,22 @@ function CheckColumns()
     }
 
     for _, column in ipairs(columns) do
-        local query = string.format([[
-            ALTER TABLE tcd_starterpack 
-            ADD COLUMN IF NOT EXISTS %s %s;
-        ]], column.name, column.type)
+        local checkQuery = string.format([[
+            SELECT COUNT(*) AS count FROM information_schema.COLUMNS 
+            WHERE TABLE_NAME = 'tcd_starterpack' 
+            AND COLUMN_NAME = '%s';
+        ]], column.name)
 
-        ExecuteQuery(query, {}, function()
-            -- ...
-        end)
+        local result = FetchQuery(checkQuery, {}) 
+
+        if result and result[1] and result[1].count == 0 then
+            local alterQuery = string.format([[
+                ALTER TABLE tcd_starterpack 
+                ADD COLUMN %s %s;
+            ]], column.name, column.type)
+
+            ExecuteQuery(alterQuery, {})
+        end
     end
 end
 
