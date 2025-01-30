@@ -1,19 +1,3 @@
-function LookEntity(entity)
-    if type(entity) == "vector3" then
-        if not IsPedHeadingTowardsPosition(PlayerPedId(), entity, 30.0) then
-            TaskTurnPedToFaceCoord(PlayerPedId(), entity, 1500)
-            Wait(1500)
-        end
-    else
-        if DoesEntityExist(entity) then
-            if not IsPedHeadingTowardsPosition(PlayerPedId(), GetEntityCoords(entity), 30.0) then
-                TaskTurnPedToFaceCoord(PlayerPedId(), GetEntityCoords(entity), 1500)
-                Wait(1500)
-            end
-        end
-    end
-end
-
 function LoadAnimDict(dict)
     while not HasAnimDictLoaded(dict) do
         RequestAnimDict(dict)
@@ -32,7 +16,7 @@ function LoadModel(entity)
     end
 end
 
-function UnloadModel()
+function UnloadModel(entity)
     SetModelAsNoLongerNeeded(entity)
 end
 
@@ -44,8 +28,8 @@ function MakeProp(data, synced, freeze)
     return prop
 end
 
-function DestroyProp()
-    SetEntityAsMissionEntity(entity)
+function DestroyProp(entity)
+    SetEntityAsMissionEntity(entity, true, true)
     Wait(5)
     DetachEntity(entity, true, true)
     Wait(5)
@@ -54,7 +38,7 @@ end
 
 function SetPed(model, coords, freeze, collision, scenario, anim)
     LoadModel(model)
-    local ped = CreatePed(0, model, coords.x, coords.y, coords.z - 1.03, coords.w, true, false)
+    local ped = CreatePed(0, model, coords.x, coords.y, coords.z - 1.03, coords.w, false, true)
     SetEntityInvincible(ped, true)
     SetBlockingOfNonTemporaryEvents(ped, true)
     FreezeEntityPosition(ped, freeze or true)

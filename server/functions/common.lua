@@ -1,5 +1,3 @@
-local Core, Framework = GetCore()
-
 ---@param source number
 ---@return string
 ---@description Get the player license using their identifiers
@@ -32,70 +30,6 @@ function GetPlayerLicense(source)
     end
 
     return license
-end
-
----@param source number
----@param desc string
----@description Send the discord log to the webhook
----@example SendDiscordLog(source, "Player has claimed the starter pack")
-function SendDiscordLog(source, desc)
-    local time = os.date("%c")
-    local webhook = DiscordConfig.webhook
-    local title = DiscordConfig.title
-    local thumbnail_url = DiscordConfig.thumbnail
-    local color = DiscordConfig.color
-
-    if not webhook then
-        warn("Webhook not found, please set your webhook in the discordlog.lua")
-        return
-    end
-
-    debugPrint("info", "Sending Discord log")
-
-    local embed = {
-        {
-            ["author"] = {
-                ["name"] = "Teezy Core Development",
-                ["icon_url"] = "https://i.imgur.com/6s82WUZ.png",
-            },
-            ["color"] = tonumber(color),
-            ["title"] = title,
-            ["description"] = desc,
-            ["thumbnail"] = {
-                ["url"] = thumbnail_url,
-            },
-            ["fields"] = {
-                {
-                    ["name"] = "Player: ",
-                    ["value"] = "```" .. GetPlayerName(source) .. "```",
-                    ["inline"] = true
-                },
-                {
-                    ["name"] = "Server ID: ",
-                    ["value"] = "```" .. source .. "```",
-                    ["inline"] = true
-                },
-                {
-                    ["name"] = "License ID:",
-                    ["value"] = "```" .. GetPlayerLicense(source) .. "```",
-                    ["inline"] = false
-                },
-                {
-                    ["name"] = "Time",
-                    ["value"] = time,
-                    ["inline"] = true
-                },
-            },
-            ["timestamp"] = os.date('!%Y-%m-%dT%H:%M:%SZ'),
-            ["footer"] = {
-                ["text"] = "Powered by TCD",
-                ["icon_url"] = "https://i.imgur.com/6s82WUZ.png",
-            },
-        }
-    }
-    PerformHttpRequest(webhook,
-        function(err, text, headers) end, 'POST', json.encode({ embeds = embed }),
-        { ['Content-Type'] = 'application/json' })
 end
 
 ---@param license string
@@ -152,4 +86,8 @@ function CheckForUpdates()
                 print("^5****************************************************************************^0")
             end
         end, "GET", "", { ["User-Agent"] = "FiveM" })
+end
+
+if Config.CheckVersion then
+    CheckForUpdates()
 end

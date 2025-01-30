@@ -10,11 +10,11 @@ function debugPrint(type, message)
     end
 
     local typeLabels = {
-        ["info"] = "^2[INFO]^7",
-        ["error"] = "^1[ERROR]^7",
-        ["warning"] = "^3[WARNING]^7",
-        ["success"] = "^2[SUCCESS]^7",
-        ["debug"] = "^5[DEBUG]^7",
+        ["info"] = "[^2INFO^7]",
+        ["error"] = "[^1ERROR^7]",
+        ["warning"] = "[^3WARNING^7]",
+        ["success"] = "[^5SUCCESS^7]",
+        ["debug"] = "[^6DEBUG^7]"
     }
 
     local identifier = isServer and "^5[SERVER]^7" or "^4[CLIENT]^7"

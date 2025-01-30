@@ -57,6 +57,7 @@ function CheckTable()
     local query = [[
         CREATE TABLE IF NOT EXISTS tcd_starterpack (
             id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(50) NOT NULL,
             identifier VARCHAR(50) NOT NULL,
             received BOOLEAN NOT NULL,
             date_received DATETIME
@@ -66,7 +67,31 @@ function CheckTable()
 
     ExecuteQuery(query, params, function()
         tableExist = true
+        CheckColumns()  -- Check for columns after table creation
     end)
 
     return tableExist
 end
+
+function CheckColumns()
+    local columns = {
+        {name = "name", type = "VARCHAR(50) NOT NULL"},
+        {name = "identifier", type = "VARCHAR(50) NOT NULL"},
+        {name = "received", type = "BOOLEAN NOT NULL"},
+        {name = "date_received", type = "DATETIME"}
+    }
+
+    for _, column in ipairs(columns) do
+        local query = string.format([[
+            ALTER TABLE tcd_starterpack 
+            ADD COLUMN IF NOT EXISTS %s %s;
+        ]], column.name, column.type)
+
+        ExecuteQuery(query, {}, function()
+            -- ...
+        end)
+    end
+end
+
+-- Call CheckTable to ensure the table and columns are set up
+CheckTable()

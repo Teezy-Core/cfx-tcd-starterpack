@@ -6,5 +6,11 @@
     "no_available_spawn": "Possible area for vehicle spawn is occupied",
     "player_in_vehicle": "You can't receive the starter pack while in the vehicle",
     "safezone_enter": "You have entered the safezone",
-    "safezone_exit": "You are no longer in a safe zone"
+    "safezone_exit": "You are no longer in a safe zone",
+    "solved_captcha": "You have solved the captcha",
+    "failed_captcha": "You have failed the captcha, please try again",
+    "accepted_rules": "Thank you for accepting the rules, you can now receive your starter pack",
+    "declined_rules": "You must accept the rules to receive the starter pack",
+    "answered_correctly": "You have successfully answered all the question",
+    "answered_incorrectly": "You have failed to answer all the questions correctly, please try again"
 }

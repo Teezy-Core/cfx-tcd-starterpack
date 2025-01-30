@@ -8,7 +8,8 @@ Config = {}
 ]]
 
 Config.Debug = false                      -- enable debug mode to see more information in the console
-Config.CheckVersion = true                -- check for the latest version of the script
+Config.CheckVersion = true               -- check for the latest version of the script
+Config.CheckPacksCommand = 'checkpacks'   -- command to check all players who have received the starter pack
 
 Config.TargetResource = 'ox_target'       -- supported: ox_target, qb-target
 Config.InventoryResource = 'ox_inventory' -- supported: ox_inventory, qb-inventory, ps-inventory, qs-inventory
@@ -17,17 +18,86 @@ Config.SQLResource = 'oxmysql'            -- supported: oxmysql, mysql-async, gh
 Config.UsePlayerLicense = true            -- if you want to use player license to check if they have received the starter pack or not
 
 Config.UseTarget = true                   -- enable target system to interact with the peds
+Config.Use3DText = false                  -- enable 3D text to show the interaction text
 
 Config.CommandConfig = {                  -- command to give the starter package
-    enable           = true,
+    enable           = false,
     command          = 'starterpack',
     command_help     = 'Get your starter pack',
     starterpack_type = 'normal',
     starter_vehicle  = {
         enable = true,
         model = 'adder',
-        random_vehicle = true,
-        parking = "pillboxgarage",
+        random_vehicle = false,
+    }
+}
+
+Config.DialogInfo = { -- dialog settings for the starter pack
+    enable = true,
+    title = 'Starter Pack',
+    dialog_type = 'rules', -- available types: rules, quiz, captcha (only one type can be enabled)
+    alert_description = 'You will receive a starter pack after accepting the rules / completing the quiz/captcha.',
+
+    quiz = {
+        questions = {
+            {
+                question = 'What is the first rule of roleplay?',
+                description = 'This question tests your understanding of roleplay basics.',
+                answers = {
+                    { label = 'Always stay in character', correct = true },
+                    { label = 'Ignore other players', correct = false },
+                    { label = 'Break character for fun', correct = false },
+                    { label = 'Use out-of-character knowledge', correct = false },
+                }
+            },
+            {
+                question = 'What should you do if someone is breaking server rules?',
+                description = 'This question tests your knowledge of server etiquette.',
+                answers = {
+                    { label = 'Report them to staff', correct = true },
+                    { label = 'Confront them in-character', correct = false },
+                    { label = 'Ignore it and move on', correct = false },
+                    { label = 'Start a fight with them', correct = false },
+                }
+            },
+            {
+                question = 'What does "Fail RP" mean?',
+                description = 'This question tests your understanding of roleplay terms.',
+                answers = {
+                    { label = 'Actions that break roleplay immersion', correct = true },
+                    { label = 'Winning a roleplay scenario', correct = false },
+                    { label = 'A type of roleplay event', correct = false },
+                    { label = 'A server rule about driving', correct = false },
+                }
+            },
+        }
+    },
+
+    captcha = {
+        captcha_type = 'ra' -- rl: random letters, rn: random numbers, ra: random alphanumeric
+    },
+
+    rules = {
+        {
+            title = 'Rule #1: Stay In Character',
+            description = 'Always remain in character while playing. Breaking character without a valid reason is not allowed.',
+        },
+        {
+            title = 'Rule #2: No Meta-Gaming',
+            description = 'Do not use out-of-character (OOC) knowledge in-character (IC). This includes information from Discord, Twitch, or other sources.',
+        },
+        {
+            title = 'Rule #3: Respect Other Players',
+            description = 'Treat all players with respect. Harassment, hate speech, or toxic behavior will not be tolerated.',
+        },
+        {
+            title = 'Rule #4: No Random Deathmatch (RDM)',
+            description = 'Do not engage in random violence or kill other players without a valid roleplay reason.',
+        },
+        {
+            title = 'Rule #5: Follow Server Guidelines',
+            description = 'Adhere to all server rules and guidelines. Failure to do so may result in warnings or bans.',
+        },
     }
 }
 
@@ -40,24 +110,27 @@ Config.Locations = {
         coords           = vec4(-1040.479126, -2731.582520, 20.164062, 238.110229), -- Coordinates and heading of the NPC (ped)
 
         ped              = {                                                        -- Settings for the ped (NPC)
-            show_only_for_newbie = false,                                           -- Show the ped only for the player who hasn't received the starter pack
             model = 'a_m_y_business_03',                                            -- Ped model (see the FiveM ped model list)
-            scenario = 'WORLD_HUMAN_CLIPBOARD',                                     -- Ped scenario (animation/behavior)
-            heading = 238.110229,                                                   -- Direction the ped is facing
+            scenario = 'Standing',                                                  -- Ped scenario (animation/behavior)
         },
 
         safezone         = { -- Safe zone settings (optional)
             enable = false,  -- Enable or disable the safe zone
-            zone_points = {} -- Define safe zone points (if enabled) using vector3
+            zone_points = {
+                vec3(-1035.819, -2734.205, 20.169),
+                vec3(-1035.999, -2727.598, 20.134),
+                vec3(-1043.567, -2723.403, 20.126),
+                vec3(-1049.598, -2731.540, 20.169),
+                vec3(-1041.131, -2739.401, 20.169),
+            } -- Define safe zone points (if enabled) using vector3
         },
 
-        starter_vehicle  = {           -- Vehicle settings for players receiving a starter vehicle
-            enable = true,             -- Enable or disable the starter vehicle
-            model = 'adder',           -- Vehicle model (from FiveM vehicle model list) will be ignored if random_vehicle is set to true
-            random_vehicle = true,     -- Spawn a random vehicle from the list (true/false)
-            teleport_player = false,   -- Teleport player to the vehicle (true/false)
-            parking = "pillboxgarage", -- Parking location name for storing the vehicle in the database (set to nil if your garage system doesn't support parking)
-            vehicle_spawns = {         -- Spawn points for the vehicle (multiple spawn locations)
+        starter_vehicle  = {         -- Vehicle settings for players receiving a starter vehicle
+            enable = true,           -- Enable or disable the starter vehicle
+            model = 'adder',         -- Vehicle model (from FiveM vehicle model list) will be ignored if random_vehicle is set to true
+            random_vehicle = true,   -- Spawn a random vehicle from the list (true/false)
+            teleport_player = false, -- Teleport player to the vehicle (true/false)
+            vehicle_spawns = {       -- Spawn points for the vehicle (multiple spawn locations)
                 vec4(-1039.02, -2727.53, 19.65, 243.17),
                 vec4(-1043.3, -2725.09, 19.65, 241.12),
                 vec4(-1047.57, -2722.66, 19.65, 240.54),
@@ -113,6 +186,7 @@ Config.SetFuel = function(vehicle, fuel)
         exports['lj-fuel']:SetFuel(vehicle, fuel)
     else
         warn("Fuel resource not found, please set your fuel resource in the config.lua")
+        SetVehicleFuelLevel(vehicle, fuel) -- Fallback to the default fuel system
     end
 end
 
