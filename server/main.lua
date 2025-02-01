@@ -10,9 +10,9 @@ local function initializeStarterPackData(license)
     if response[1] then
         return true
     else
-        local insertQuery = "INSERT INTO tcd_starterpack (identifier, received, date_received) VALUES (?, ?, ?)"
-        local insertParams = { license, 0, nil }
-
+        local insertQuery = "INSERT INTO tcd_starterpack (identifier, received, date_received, name) VALUES (?, ?, ?, ?)"
+        local insertParams = { license, 0, nil, "Unknown" }
+        
         ExecuteQuery(insertQuery, insertParams, function()
             debugPrint("success", "Player has received the starter pack")
         end)
