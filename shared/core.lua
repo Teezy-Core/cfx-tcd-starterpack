@@ -38,8 +38,12 @@ function GetCore()
                 if Config.Debug then print(("[^2INFO^7] ^5%s object found^7"):format(fw.framework)) end
                 CachedCore, CachedFramework = Core, Framework
                 for _, resource in ipairs(Resources) do
-                    if GetResourceState(resource) ~= "started" then
-                        error(("[^1ERROR] %s Resource not found^7"):format(resource))
+                    if resource == Config.TargetResource and not Config.UseTarget then
+                        if Config.Debug then print(("[^2INFO^7] ^5Skipping %s Resource check as UseTarget is false^7"):format(resource)) end
+                    else
+                        if GetResourceState(resource) ~= "started" then
+                            error(("[^1ERROR] %s Resource not found^7"):format(resource))
+                        end
                     end
                 end
                 return Core, Framework

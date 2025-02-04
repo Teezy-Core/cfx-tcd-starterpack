@@ -9,16 +9,17 @@ Config = {}
 
 Config.Debug = false                      -- enable debug mode to see more information in the console
 Config.CheckVersion = true               -- check for the latest version of the script
+Config.DBChecking = true                  -- check if the database table, and columns are initialized properly (only enable this if you are having issues with the database)
 Config.CheckPacksCommand = 'checkpacks'   -- command to check all players who have received the starter pack
 
 Config.TargetResource = 'ox_target'       -- supported: ox_target, qb-target
-Config.InventoryResource = 'ox_inventory' -- supported: ox_inventory, qb-inventory, ps-inventory, qs-inventory
+Config.InventoryResource = 'ox_inventory' -- supported: ox_inventory, qb-inventory, ps-inventory, qs-inventory, codem-inventory
 Config.SQLResource = 'oxmysql'            -- supported: oxmysql, mysql-async, ghmattimysql
 
 Config.UsePlayerLicense = true            -- if you want to use player license to check if they have received the starter pack or not
 
-Config.UseTarget = true                   -- enable target system to interact with the peds
-Config.Use3DText = false                  -- enable 3D text to show the interaction text
+Config.UseTarget = false                   -- enable target system to interact with the peds
+Config.Use3DText = true                  -- enable 3D text to show the interaction text
 
 Config.CommandConfig = {                  -- command to give the starter package
     enable           = false,
@@ -216,7 +217,8 @@ Config.Notification = function(message, type, is_server, src)
         end
     else
         if Framework == "esx" then
-            TriggerEvent("esx:showNotification", message)
+            -- TriggerEvent("esx:showNotification", message)
+            Core.ShowNotification(message, type, 5000)
         else
             Core.Functions.Notify(message, type, 5000)
         end

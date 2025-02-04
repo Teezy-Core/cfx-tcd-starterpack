@@ -67,7 +67,7 @@ function CheckTable()
 
     ExecuteQuery(query, params, function()
         tableExist = true
-        CheckColumns()  -- Check for columns after table creation
+        CheckColumns() -- Check for columns after table creation
     end)
 
     return tableExist
@@ -75,24 +75,24 @@ end
 
 function CheckColumns()
     local columns = {
-        {name = "name", type = "VARCHAR(50) NOT NULL"},
-        {name = "identifier", type = "VARCHAR(50) NOT NULL"},
-        {name = "received", type = "BOOLEAN NOT NULL"},
-        {name = "date_received", type = "DATETIME"}
+        { name = "name",          type = "VARCHAR(50) NOT NULL" },
+        { name = "identifier",    type = "VARCHAR(50) NOT NULL" },
+        { name = "received",      type = "BOOLEAN NOT NULL" },
+        { name = "date_received", type = "DATETIME" }
     }
 
     for _, column in ipairs(columns) do
         local checkQuery = string.format([[
-            SELECT COUNT(*) AS count FROM information_schema.COLUMNS 
-            WHERE TABLE_NAME = 'tcd_starterpack' 
+            SELECT COUNT(*) AS count FROM information_schema.COLUMNS
+            WHERE TABLE_NAME = 'tcd_starterpack'
             AND COLUMN_NAME = '%s';
         ]], column.name)
 
-        local result = FetchQuery(checkQuery, {}) 
+        local result = FetchQuery(checkQuery, {})
 
         if result and result[1] and result[1].count == 0 then
             local alterQuery = string.format([[
-                ALTER TABLE tcd_starterpack 
+                ALTER TABLE tcd_starterpack
                 ADD COLUMN %s %s;
             ]], column.name, column.type)
 
@@ -102,4 +102,6 @@ function CheckColumns()
 end
 
 -- Call CheckTable to ensure the table and columns are set up
-CheckTable()
+if Config.DBChecking then
+    CheckTable()
+end

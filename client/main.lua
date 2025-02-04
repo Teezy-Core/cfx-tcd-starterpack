@@ -1,6 +1,8 @@
 Targets, Peds = {}, {}
 local IsBusy, PedSpawned = false, false
+local Core, Framework = GetCore()
 
+lib.locale()
 -- [[ FUNCTIONS ]] --
 local function deleteNearbyPeds(coords)
     for _, ped in ipairs(GetGamePool('CPed')) do
@@ -44,6 +46,7 @@ local function giveVehicleStarter(data)
         local closestVehicle = GetClosestVehicle(spawnCoords.x, spawnCoords.y, spawnCoords.z, 3.0, 0, 70)
         if closestVehicle == 0 then
             if Framework == "esx" then
+                debugPrint("info", "Framework: ESX")
                 Core.Game.SpawnVehicle(vehicle, spawnCoords, spawnCoords.w, function(vehicle)
                     if data.starter_vehicle.teleport_player then
                         TaskWarpPedIntoVehicle(PlayerPedId(), vehicle, -1)
@@ -130,9 +133,10 @@ local function giveStarterPack(data)
                         ClearPedTasksImmediately(ped)
 
                         TaskPlayAnim(playerPed, "mp_common", "givetake1_a", 8.0, 1.0, -1, 0, 0, false, false, false)
-                        TaskPlayAnim(ped, "amb@prop_human_atm@male@enter", "enter", 8.0, 1.0, -1, 0, 0, false, false, false)
+                        TaskPlayAnim(ped, "amb@prop_human_atm@male@enter", "enter", 8.0, 1.0, -1, 0, 0, false, false,
+                            false)
                         Wait(1000)
-                        
+
                         debugPrint("info", "Giving starter pack to the player")
                         TriggerServerEvent("cfx-tcd-starterpack:Server:ClaimStarterpack", data.starterpack_type)
 
@@ -155,6 +159,7 @@ local function giveStarterPack(data)
                 IsBusy = false
             else
                 Config.Notification(locale("progress_cancelled"), "error", false)
+                IsBusy = false
             end
         end
     end)
@@ -163,7 +168,7 @@ end
 local function showQuizDialog(callback)
     local questions = Config.DialogInfo.quiz.questions
     local wrongAnswers = 0
-    
+
     math.randomseed(GetGameTimer())
     for i = #questions, 2, -1 do
         local j = math.random(i)
@@ -180,7 +185,7 @@ local function showQuizDialog(callback)
         end
 
         local input = lib.inputDialog('Question #' .. i, {
-            { 
+            {
                 type = 'select',
                 label = question.question,
                 description = question.description,
@@ -195,7 +200,7 @@ local function showQuizDialog(callback)
         if input then
             local selectedAnswer = nil
             local correctAnswer = false
-            
+
             for _, answer in ipairs(question.answers) do
                 if input[1] == answer.label then
                     selectedAnswer = answer
@@ -222,8 +227,9 @@ end
 
 local function generateCaptcha(type)
     if type == 'rl' then
-        return string.char(math.random(65, 90)) .. string.char(math.random(65, 90)) .. string.char(math.random(65, 90)) ..
-               string.char(math.random(65, 90)) .. string.char(math.random(65, 90)) .. string.char(math.random(65, 90))
+        return string.char(math.random(65, 90)) ..
+            string.char(math.random(65, 90)) .. string.char(math.random(65, 90)) ..
+            string.char(math.random(65, 90)) .. string.char(math.random(65, 90)) .. string.char(math.random(65, 90))
     end
     if type == 'rn' then
         return tostring(math.random(100000, 999999))
@@ -238,7 +244,7 @@ local function showCaptchaDialog(callback)
     local input = lib.inputDialog('Solve the Captcha', {
         { type = 'input', label = 'Enter Captcha', description = 'Please enter: ' .. captcha, placeholder = 'Enter Captcha to continue', required = true }
     })
-    
+
     if input and input[1] == captcha then
         callback(true)
     else
@@ -247,8 +253,6 @@ local function showCaptchaDialog(callback)
 end
 
 local function dialogHelper(data)
-
-
     if Config.DialogInfo.enable then
         local dialogType = Config.DialogInfo.dialog_type
 
@@ -304,6 +308,7 @@ local function dialogHelper(data)
 end
 
 local function initializeTarget(data)
+    if not Config.UseTarget then return end
     if Config.TargetResource == 'ox_target' and GetResourceState(Config.TargetResource) == 'started' then
         debugPrint('info', Config.TargetResource .. ' is started')
         local shown = false
@@ -359,19 +364,30 @@ local function initializeTarget(data)
                     icon = data.icon,
                     label = data.label,
                     action = function()
-                        if Config.DialogInfo.enable then
-                            if not shown then
-                                lib.alertDialog({
-                                    header = Config.DialogInfo.title,
-                                    content = Config.DialogInfo.alert_description,
-                                    centered = true,
-                                    cancel = false
-                                })
-                                shown = true
+                        debugPrint('info', 'Player is interacting with the ped')
+
+                        lib.callback('cfx-tcd-starterpack:CB:CheckPlayer', false, function(result)
+                            if result then
+                                debugPrint("info", "Player has already received the starter pack")
+                                Config.Notification(locale("already_received"), "error", false)
+                                IsBusy = false
+                            else
+                                if Config.DialogInfo.enable then
+                                    if not shown then
+                                        lib.alertDialog({
+                                            header = Config.DialogInfo.title,
+                                            content = Config.DialogInfo.alert_description,
+                                            centered = true,
+                                            cancel = false
+                                        })
+                                        shown = true
+                                    end
+                                end
+                                dialogHelper(data)
                             end
-                        end
-                        dialogHelper(data)
-                        IsBusy = true
+                        end)
+        
+                        IsBusy = false
                     end,
                     canInteract = function(entity)
                         if IsPedInAnyVehicle(PlayerPedId(), true) or IsEntityDead(PlayerPedId()) or IsEntityDead(entity) or lib.progressActive() or IsBusy then
@@ -458,18 +474,27 @@ local function spawnPeds(data)
 
                         if IsControlJustPressed(0, 38) then
                             debugPrint('info', 'Player is interacting with the ped')
-                            if Config.DialogInfo.enable then
-                                if not shown then
-                                    lib.alertDialog({
-                                        header = Config.DialogInfo.title,
-                                        content = Config.DialogInfo.alert_description,
-                                        centered = true,
-                                        cancel = false
-                                    })
-                                    shown = true
+                            lib.callback('cfx-tcd-starterpack:CB:CheckPlayer', false, function(result)
+                                if result then
+                                    debugPrint("info", "Player has already received the starter pack")
+                                    Config.Notification(locale("already_received"), "error", false)
+                                    IsBusy = false
+                                else
+                                    if Config.DialogInfo.enable then
+                                        if not shown then
+                                            lib.alertDialog({
+                                                header = Config.DialogInfo.title,
+                                                content = Config.DialogInfo.alert_description,
+                                                centered = true,
+                                                cancel = false
+                                            })
+                                            shown = true
+                                        end
+                                    end
+                                    dialogHelper(data)
+                                    IsBusy = true
                                 end
-                            end
-                            dialogHelper(data)
+                            end)
                             IsBusy = false
                         end
                     else
@@ -684,13 +709,19 @@ RegisterNetEvent("cfx-tcd-starterpack:Client:GiveStarterVehicle", function(data)
 end)
 -- [[ END EVENTS ]] --
 
-AddEventHandler('onClientResourceStart', function(resource)
-    if resource ~= GetCurrentResourceName() then return end
-
+local function initializeHelper()
+    Wait(1000)
     checkAndSpawnPeds()
     for _, data in pairs(Config.Locations) do
         initializeTarget(data)
     end
+end
+
+CreateThread(function()
+    repeat
+        initializeHelper()
+        Wait(1000)
+    until #Peds > 0 and #Targets > 0
 end)
 
 AddEventHandler('onResourceStop', function(resource)

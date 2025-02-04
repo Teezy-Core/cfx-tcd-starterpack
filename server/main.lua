@@ -1,5 +1,6 @@
 local PedSpawned = false
-
+local Core, Framework = GetCore()
+lib.locale()
 -- [[ FUNCTIONS ]] --
 local function initializeStarterPackData(license)
     local query = "SELECT * FROM tcd_starterpack WHERE identifier = ?"
@@ -153,6 +154,8 @@ local function giveItems(src, type)
             TriggerClientEvent('ps-inventory:client:ItemBox', src, Core.Shared.Items[item.item], 'add')
         elseif Config.InventoryResource == "qs-inventory" and GetResourceState(Config.InventoryResource) == 'started' then
             exports['qs-inventory']:AddItem(src, item.item, item.amount)
+        elseif Config.InventoryResource == "codem-inventory" and GetResourceState(Config.InventoryResource) == 'started' then
+            exports['codem-inventory']:AddItem(src, item.item, item.amount)
         else
             error("Inventory resource not found, please set your inventory resource in the config.lua")
         end
