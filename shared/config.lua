@@ -189,6 +189,8 @@ Config.SetFuel = function(vehicle, fuel)
         exports['ps-fuel']:SetFuel(vehicle, fuel)
     elseif GetResourceState("lj-fuel") == "started" then
         exports['lj-fuel']:SetFuel(vehicle, fuel)
+    elseif GetResourceState("ox_fuel") == "started" then
+        Entity(vehicle).state.fuel = fuel
     else
         warn("Fuel resource not found, please set your fuel resource in the config.lua")
         SetVehicleFuelLevel(vehicle, fuel) -- Fallback to the default fuel system
