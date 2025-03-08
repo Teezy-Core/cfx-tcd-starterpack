@@ -8,18 +8,19 @@ Config = {}
 ]]
 
 Config.Debug = false                      -- enable debug mode to see more information in the console
-Config.CheckVersion = true               -- check for the latest version of the script
+Config.CheckVersion = true                -- check for the latest version of the script
 Config.DBChecking = true                  -- check if the database table, and columns are initialized properly (only enable this if you are having issues with the database)
 Config.CheckPacksCommand = 'checkpacks'   -- command to check all players who have received the starter pack
 
 Config.TargetResource = 'ox_target'       -- supported: ox_target, qb-target
-Config.InventoryResource = 'ox_inventory' -- supported: ox_inventory, qb-inventory, ps-inventory, qs-inventory, codem-inventory
+Config.InventoryResource =
+'ox_inventory'                            -- supported: ox_inventory, qb-inventory, ps-inventory, qs-inventory, codem-inventory
 Config.SQLResource = 'oxmysql'            -- supported: oxmysql, mysql-async, ghmattimysql
 
 Config.UsePlayerLicense = true            -- if you want to use player license to check if they have received the starter pack or not
 
-Config.UseTarget = false                   -- enable target system to interact with the peds
-Config.Use3DText = true                  -- enable 3D text to show the interaction text
+Config.UseTarget = true                   -- enable target system to interact with the peds
+Config.Use3DText = false                  -- enable 3D text to show the interaction text
 
 Config.CommandConfig = {                  -- command to give the starter package
     enable           = false,
@@ -45,9 +46,9 @@ Config.DialogInfo = { -- dialog settings for the starter pack
                 question = 'What is the first rule of roleplay?',
                 description = 'This question tests your understanding of roleplay basics.',
                 answers = {
-                    { label = 'Always stay in character', correct = true },
-                    { label = 'Ignore other players', correct = false },
-                    { label = 'Break character for fun', correct = false },
+                    { label = 'Always stay in character',       correct = true },
+                    { label = 'Ignore other players',           correct = false },
+                    { label = 'Break character for fun',        correct = false },
                     { label = 'Use out-of-character knowledge', correct = false },
                 }
             },
@@ -55,10 +56,10 @@ Config.DialogInfo = { -- dialog settings for the starter pack
                 question = 'What should you do if someone is breaking server rules?',
                 description = 'This question tests your knowledge of server etiquette.',
                 answers = {
-                    { label = 'Report them to staff', correct = true },
+                    { label = 'Report them to staff',       correct = true },
                     { label = 'Confront them in-character', correct = false },
-                    { label = 'Ignore it and move on', correct = false },
-                    { label = 'Start a fight with them', correct = false },
+                    { label = 'Ignore it and move on',      correct = false },
+                    { label = 'Start a fight with them',    correct = false },
                 }
             },
             {
@@ -66,9 +67,9 @@ Config.DialogInfo = { -- dialog settings for the starter pack
                 description = 'This question tests your understanding of roleplay terms.',
                 answers = {
                     { label = 'Actions that break roleplay immersion', correct = true },
-                    { label = 'Winning a roleplay scenario', correct = false },
-                    { label = 'A type of roleplay event', correct = false },
-                    { label = 'A server rule about driving', correct = false },
+                    { label = 'Winning a roleplay scenario',           correct = false },
+                    { label = 'A type of roleplay event',              correct = false },
+                    { label = 'A server rule about driving',           correct = false },
                 }
             },
         }
@@ -81,15 +82,18 @@ Config.DialogInfo = { -- dialog settings for the starter pack
     rules = {
         {
             title = 'Rule #1: Stay In Character',
-            description = 'Always remain in character while playing. Breaking character without a valid reason is not allowed.',
+            description =
+            'Always remain in character while playing. Breaking character without a valid reason is not allowed.',
         },
         {
             title = 'Rule #2: No Meta-Gaming',
-            description = 'Do not use out-of-character (OOC) knowledge in-character (IC). This includes information from Discord, Twitch, or other sources.',
+            description =
+            'Do not use out-of-character (OOC) knowledge in-character (IC). This includes information from Discord, Twitch, or other sources.',
         },
         {
             title = 'Rule #3: Respect Other Players',
-            description = 'Treat all players with respect. Harassment, hate speech, or toxic behavior will not be tolerated.',
+            description =
+            'Treat all players with respect. Harassment, hate speech, or toxic behavior will not be tolerated.',
         },
         {
             title = 'Rule #4: No Random Deathmatch (RDM)',
@@ -194,12 +198,21 @@ end
 ---@param vehicle any
 ---@return string
 ---@decription If you have a custom vehicle key system you can give the key to the player
-Config.GiveKey = function(vehicle)
-    local Core, Framework = GetCore()
-    if Framework == "esx" then
-        -- ESX Vehicle Key System
+Config.GiveKey = function(vehicle, plate)
+    if GetResourceState("wasabi_carlock") == "started" then
+        exports.wasabi_carlock:GiveKey(plate)
+    elseif GetResourceState("jaksam-vehicles-keys") == "started" then
+        TriggerServerEvent("vehicles_keys:selfGiveVehicleKeys", plate)
+    elseif GetResourceState("cd_garage") == "started" then
+        TriggerEvent('cd_garage:AddKeys', plate)
+    elseif GetResourceState("okokGarage") == "started" then
+        TriggerServerEvent("okokGarage:GiveKeys", plate)
+    elseif GetResourceState("t1ger_keys") == "started" then
+        TriggerServerEvent('t1ger_keys:updateOwnedKeys', plate, true)
+    elseif GetResourceState("ak47_vehiclekeys") == "started" then
+        exports['ak47_vehiclekeys']:GiveKey(plate, false)
     else
-        TriggerEvent("vehiclekeys:client:SetOwner", Core.Functions.GetPlate(vehicle))
+        TriggerEvent("vehiclekeys:client:SetOwner", plate)
     end
 end
 

@@ -3,6 +3,7 @@ local IsBusy, PedSpawned = false, false
 local Core, Framework = GetCore()
 
 lib.locale()
+
 -- [[ FUNCTIONS ]] --
 local function deleteNearbyPeds(coords)
     for _, ped in ipairs(GetGamePool('CPed')) do
@@ -57,7 +58,7 @@ local function giveVehicleStarter(data)
                     }
 
                     Config.SetFuel(vehicle, data.starter_vehicle.fuel)
-                    Config.GiveKey(vehicle)
+                    Config.GiveKey(vehicle, Core.Game.GetVehicleProperties(vehicle).plate)
 
                     TriggerServerEvent("cfx-tcd-starterpack:Server:ClaimVehicle", vehicleData)
 
@@ -75,7 +76,7 @@ local function giveVehicleStarter(data)
                     }
 
                     Config.SetFuel(veh, data.starter_vehicle.fuel)
-                    Config.GiveKey(veh)
+                    Config.GiveKey(veh, Core.Functions.GetPlate(veh))
 
                     TriggerServerEvent("cfx-tcd-starterpack:Server:ClaimVehicle", vehicleData)
 
@@ -386,7 +387,7 @@ local function initializeTarget(data)
                                 dialogHelper(data)
                             end
                         end)
-        
+
                         IsBusy = false
                     end,
                     canInteract = function(entity)
@@ -412,19 +413,18 @@ local function draw3DText(coords, text, color)
     local distance = GetDistanceBetweenCoords(camCoords, coords.x, coords.y, coords.z, true)
     local scale = (1 / distance) * 2
     local fov = (1 / GetGameplayCamFov()) * 100
-    local scale = scale * fov
 
     if onScreen then
         SetTextScale(0.0, 0.35)
         SetTextFont(4)
-        SetTextProportional(1)
+        SetTextProportional(true)
         SetTextColour(color.r, color.g, color.b, color.a)
         SetTextDropshadow(0, 0, 0, 0, 255)
         SetTextEdge(2, 0, 0, 0, 150)
         SetTextDropShadow()
         SetTextOutline()
         SetTextEntry("STRING")
-        SetTextCentre(1)
+        SetTextCentre(true)
         AddTextComponentString(text)
         DrawText(x, y)
     end
@@ -518,23 +518,14 @@ local function spawnPeds(data)
             end
         end
     end
-end
 
-local function checkAndSpawnPeds()
-    lib.callback('cfx-tcd-starterpack:CB:CheckPed', false, function(result)
-        PedSpawned = result
-
-        if not result then
-            for _, data in pairs(Config.Locations) do
-                spawnPeds(data)
-                TriggerServerEvent('cfx-tcd-starterpack:Server:SetSpawnPed', true)
-            end
-        end
-    end)
+    initializeTarget(data)
 end
 -- [[ END FUNCTIONS ]] --
 
 for _, location in pairs(Config.Locations) do
+    spawnPeds(location)
+
     if location.safezone.enable and #location.safezone.zone_points == 0 then
         debugPrint("error", "Safezone is enabled for location but no zone points are defined")
         return
@@ -684,7 +675,7 @@ RegisterNetEvent("cfx-tcd-starterpack:Client:GiveStarterVehicle", function(data)
         Core.Game.SpawnVehicle(vehicle, playerCoords, playerHeading, function(vehicle)
             TaskWarpPedIntoVehicle(playerPed, vehicle, -1)
             Config.SetFuel(vehicle, data.fuel)
-            Config.GiveKey(vehicle)
+            Config.GiveKey(vehicle, Core.Game.GetVehicleProperties(vehicle).plate)
 
             local vehicleData = {
                 props = Core.Game.GetVehicleProperties(vehicle),
@@ -696,7 +687,7 @@ RegisterNetEvent("cfx-tcd-starterpack:Client:GiveStarterVehicle", function(data)
         Core.Functions.SpawnVehicle(vehicle, function(vehicle)
             TaskWarpPedIntoVehicle(playerPed, vehicle, -1)
             Config.SetFuel(vehicle, data.fuel)
-            Config.GiveKey(vehicle)
+            Config.GiveKey(vehicle, Core.Functions.GetPlate(vehicle))
 
             local vehicleData = {
                 props = Core.Functions.GetVehicleProperties(vehicle),
@@ -708,21 +699,6 @@ RegisterNetEvent("cfx-tcd-starterpack:Client:GiveStarterVehicle", function(data)
     end
 end)
 -- [[ END EVENTS ]] --
-
-local function initializeHelper()
-    Wait(1000)
-    checkAndSpawnPeds()
-    for _, data in pairs(Config.Locations) do
-        initializeTarget(data)
-    end
-end
-
-CreateThread(function()
-    repeat
-        initializeHelper()
-        Wait(1000)
-    until #Peds > 0 and #Targets > 0
-end)
 
 AddEventHandler('onResourceStop', function(resource)
     if GetCurrentResourceName() == resource then

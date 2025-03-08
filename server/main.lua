@@ -1,6 +1,7 @@
-local PedSpawned = false
 local Core, Framework = GetCore()
+
 lib.locale()
+
 -- [[ FUNCTIONS ]] --
 local function initializeStarterPackData(license)
     local query = "SELECT * FROM tcd_starterpack WHERE identifier = ?"
@@ -29,7 +30,7 @@ local function sendDiscordLog(source, desc)
     local color = DiscordConfig.color
 
     if not webhook then
-        warn("Webhook not found, please set your webhook in the discordlog.lua")
+        warn("Webhook not found, please set your webhook in the server/functions/discordlog.lua")
         return
     end
 
@@ -227,21 +228,9 @@ RegisterNetEvent('cfx-tcd-starterpack:Server:UpdateStarterPack', function(identi
     end
 end)
 
-RegisterNetEvent('cfx-tcd-starterpack:Server:SetSpawnPed', function(bool)
-    PedSpawned = bool
-end)
-
-RegisterNetEvent('cfx-tcd-starterpack:Server:InitializePed', function(data)
-    TriggerClientEvent('cfx-tcd-starterpack:Client:InitializePed', -1, data)
-end)
-
 -- [[ END EVENTS ]] --
 
 -- [[ CALLBACKS ]] --
-lib.callback.register('cfx-tcd-starterpack:CB:CheckPed', function(source)
-    return PedSpawned
-end)
-
 lib.callback.register('cfx-tcd-starterpack:CB:CheckPlayer', function(source)
     local license = GetPlayerLicense(source)
 
