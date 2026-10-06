@@ -167,10 +167,28 @@ end
 -- [[ EVENTS ]] --
 RegisterNetEvent('cfx-tcd-starterpack:Server:ClaimVehicle', function(vehicleData)
     local src = source
+    local license = GetPlayerLicense(src)
+    -- one-time grant: the pack must not have been claimed before
+    if HasReceivedStarterPack(license) then
+        debugPrint("info", "Player has already received the starter pack")
+        Config.Notification(locale("already_received"), "error", false, src)
+        return
+    end
+
     local Player = Framework == "esx" and Core.GetPlayerFromId(src) or Core.Functions.GetPlayer(src)
     local identifier = Framework == "esx" and Player.identifier or Player.PlayerData.citizenid
 
-    lib.callback("cfx-tcd-starterpack:CB:CheckReceivingRadius", src, function(result)
+    -- vehicle model allowlist: the configured model or any random-pool entry.
+    -- nothing else that a modified client can cook up in vehicleData is accepted.
+    local allowed = {}
+    allowed[Config.CommandConfig.starter_vehicle.model] = true
+    for _, m in ipairs(Config.RandomVehicles.vehicles) do allowed[m] = true end
+    if not vehicleData or not vehicleData.vehicle_name or not allowed[vehicleData.vehicle_name] then
+        debugPrint("error", "ClaimVehicle rejected a non-allowlisted vehicle")
+        return
+    end
+
+    lib.callback.await("cfx-tcd-starterpack:CB:CheckReceivingRadius", false, src, function(result)
         if not result then
             debugPrint("error", "Player is not in the receiving radius")
             Config.Notification(locale("not_near_receiving_point"), "error", false, src)
@@ -191,19 +209,18 @@ RegisterNetEvent('cfx-tcd-starterpack:Server:ClaimStarterpack', function(starter
         return
     end
 
-    lib.callback("cfx-tcd-starterpack:CB:CheckReceivingRadius", src, function(result)
-        if not result then
-            debugPrint("error", "Player is not in the receiving radius")
-            Config.Notification(locale("not_near_receiving_point"), "error", false, src)
-            return
-        end
+    -- the radius check must actually pass before anything is granted or logged
+    local radiusOk = lib.callback.await("cfx-tcd-starterpack:CB:CheckReceivingRadius", false, src)
+    if not radiusOk then
+        debugPrint("error", "Player is not in the receiving radius")
+        Config.Notification(locale("not_near_receiving_point"), "error", false, src)
+        return
+    end
 
-        if starterpack_type then
-            debugPrint("info", "Player has received the starter pack type: "..starterpack_type)
-            giveItems(src, starterpack_type)
-        end
-        
-    end)
+    if starterpack_type then
+        debugPrint("info", "Player has received the starter pack type: "..starterpack_type)
+        giveItems(src, starterpack_type)
+    end
 
     updatePlayerData(GetPlayerName(src), license, true)
     sendDiscordLog(src, "Player has received their starter pack")
@@ -211,6 +228,9 @@ RegisterNetEvent('cfx-tcd-starterpack:Server:ClaimStarterpack', function(starter
 end)
 
 RegisterNetEvent('cfx-tcd-starterpack:Server:UpdateStarterPack', function(identifier, type)
+    -- restricted: previously ANY client could reset (re-claim packs / dupes) or
+    -- delete records for any identifier. Console/admin only.
+    if source ~= 0 then return end
     if type == 'reset' then
         local query = "UPDATE tcd_starterpack SET received = ? WHERE identifier = ?"
         local params = { 0, identifier }
